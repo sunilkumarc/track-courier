@@ -25,7 +25,7 @@ server.get('/', function(req, res){
     res.status(200).send("Server Working Fine :D");
 });
 
-server.get('/parcel/short_details', function(req, res) {
+server.get('/parcels/short_details', function(req, res) {
     Parcel.find().select('name price').exec(function(err, parcels) {
         if (parcels) {
             res.send(parcels);

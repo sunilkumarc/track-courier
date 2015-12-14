@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Track Courier</title>
+    <!-- <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.1.1/css/bootstrap.min.css"> -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+        integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+</head>
+<body>
+
+    <!-- Container where the different pages will be loaded -->
+    <div class="container-fluid">
+        <h1>Track Courier</h1>
+        <hr/>
+        <div class="row">
+          <div class="col-md-6"><div class="parcels"></div></div>
+          <div class="col-md-6">
+              <div class="panel panel-default">
+                  <div class="panel-heading">Summary</div>
+                  <div class="panel-body">
+                    <div class="parcel-summary"></div>
+                  </div>
+              </div>
+          </div>
+        </div>
+    </div>
+
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.2/underscore-min.js" type="text/javascript"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.2/backbone-min.js"></script>
+
+    <script type="text/template" id="parcels-short-details">
+        <ul class="list-group">
+        <% _.each(parcels, function(parcel) { %>
+            <li class="list-group-item"><%= htmlEncode(parcel.get('name')) %></li>
+        <% }); %>
+        </ul>
+    </script>
+
+    <script>
+        $.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
+            options.url = 'http://localhost:8000' + options.url;
+        });
+
+        function htmlEncode(value){
+          return $('<div/>').text(value).html();
+        }
+
+        $.fn.serializeObject = function() {
+          var o = {};
+          var a = this.serializeArray();
+          $.each(a, function() {
+              if (o[this.name] !== undefined) {
+                  if (!o[this.name].push) {
+                      o[this.name] = [o[this.name]];
+                  }
+                  o[this.name].push(this.value || '');
+              } else {
+                  o[this.name] = this.value || '';
+              }
+          });
+          return o;
+        };
+
+
+        /////////////// Models //////////////////////////
+
+
+        ////////////// Collections //////////////////////
+        var ParcelsShortDetails = Backbone.Collection.extend({
+            url: '/parcels/short_details'
+        });
+
+
+        ////////////// Views ////////////////////////////
+        var HomeView = Backbone.View.extend({
+            el: '.parcels',
+
+            render: function() {
+                var that = this;
+                var parceslsShortDetails = new ParcelsShortDetails();
+                parceslsShortDetails.fetch({
+                    success: function(parcels) {
+                        var template = _.template($('#parcels-short-details').html(), {parcels: parcels.models});
+                        that.$el.html(template);
+                    }
+                });
+            }
+        });
+        var homeView = new HomeView();
+
+
+        /////////////// Router //////////////////////////
+        var Router = Backbone.Router.extend({
+            routes: {
+                "" : "home"
+            }
+        });
+        var router = new Router();
+
+        router.on('route:home', function () {
+            homeView.render();
+        });
+
+        Backbone.history.start();
+    </script>
+</body>
+</html>
