@@ -1,0 +1,16 @@
+{
+    "_id" : ObjectId("5652e99da4871155f80fd8c8"),
+    "name" : "Red dead redemption 2",
+    "price" : 3400,
+    "color" : "blue",
+    "from" : "Wild West",
+    "to" : "#1402, Out house, 9th main, 9th cross, Srinivasnagar",
+    "vendor" : "Rockstar Games",
+    "dispatched_on" : "Mon Nov 23 2015 15:56:19 GMT+0530 (IST)",
+    "weight" : 0.2,
+    "current_location" : {
+        "lattitude" : "",
+        "longitude" : ""
+    },
+    "img_url" : "http://test2"
+}

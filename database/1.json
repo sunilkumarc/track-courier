@@ -1,0 +1,16 @@
+{
+    "_id" : ObjectId("5652e94aa4871155f80fd8c7"),
+    "name" : "Dell S2240L",
+    "price" : 9450,
+    "color" : "black",
+    "from" : "SAP Labs India Pvt. Ltd. Bangalore. 560066",
+    "to" : "#1402, Out house, 9th main, 9th cross, Srinivasnagar",
+    "vendor" : "eKart",
+    "dispatched_on" : "Mon Nov 23 2015 15:51:19 GMT+0530 (IST)",
+    "weight" : 4,
+    "current_location" : {
+        "lattitude" : "",
+        "longitude" : ""
+    },
+    "img_url" : "http://test"
+}
