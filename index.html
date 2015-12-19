@@ -1,42 +1,50 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Track Courier</title>
-    <!-- <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.1.1/css/bootstrap.min.css"> -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
-        integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-</head>
-<body>
+<!DOCTYPE html>
+<html>
+  <head>
 
-    <!-- Container where the different pages will be loaded -->
-    <div class="container-fluid">
-        <h1>Track Courier</h1>
-        <hr/>
-        <div class="row">
-          <div class="col-md-6"><div class="parcels"></div></div>
-          <div class="col-md-6">
-              <div class="panel panel-default">
-                  <div class="panel-heading">Summary</div>
-                  <div class="panel-body">
-                    <div class="parcel-summary"></div>
-                    <div class="my-map"></div>
-                  </div>
-              </div>
+      <meta charset="utf-8">
+      <title>Track Courier</title>
+      <!-- <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.1.1/css/bootstrap.min.css"> -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    <style type="text/css">
+      html, body { height: 100%; margin: 0; padding: 0; }
+      #map { height: 50%; width: 50%; }
+    </style>
+  </head>
+  <body>
+
+      <!-- Container where the different pages will be loaded -->
+      <div class="container-fluid">
+          <h1>Track Courier</h1>
+          <hr/>
+          <div class="row">
+            <div class="col-md-6"><div class="parcels"></div></div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Summary</div>
+                    <div class="panel-body">
+                      <div class="parcel-summary"></div>
+                    </div>
+                </div>
+            </div>
           </div>
-        </div>
-    </div>
+      </div>
+      <!-- <div class="panel"> -->
+          <div id="map"></div>
+      <!-- </div> -->
 
     <!-- <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script> -->
     <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.2/underscore-min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.2/backbone-min.js"></script>
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZVrpwoAbKCzpjtspToqCHbUICoOq9ybs&sensor=false"></script>
+    <!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZVrpwoAbKCzpjtspToqCHbUICoOq9ybs&sensor=false"></script> -->
 
     <script type="text/template" id="parcels-short-details">
         <ul class="list-group">
         <% _.each(parcels, function(parcel) { %>
-            <a class="parcel-link"><li class="list-group-item"><%= htmlEncode(parcel.get('name')) %></li></a>
+            <button type="button" class="list-group-item load-summary" data-parcel="<%= parcel.get('_id')%>"><%= htmlEncode(parcel.get('name')) %></button>
         <% }); %>
         </ul>
     </script>
@@ -122,6 +130,15 @@
         var HomeView = Backbone.View.extend({
             el: '.parcels',
 
+            events: {
+                'click .load-summary': 'loadSummary'
+            },
+
+            loadSummary: function(ev) {
+                var parcel_id = $(ev.currentTarget).data('parcel');
+                parcelSummaryView.render(parcel_id);
+            },
+
             render: function() {
                 var that = this;
                 var parceslsShortDetails = new ParcelsShortDetails();
@@ -150,32 +167,24 @@
                         var location = parcel.get('current_location');
                         var position = {lat: Number(location['lattitude']), lng: Number(location['longitude'])};
 
-                        // var mapView = new MapView(position);
-                        // mapView.render();
-                        getMap(position);
+                        loadMap(position);
                     }
                 });
             }
         });
         var parcelSummaryView = new ParcelSummarView();
 
-        var MapView = Backbone.View.extend({
-            el: $('.map'),
+        var map;
 
-            initialize: function(position) {
-                this.position = position;
-            },
+        function loadMap(position) {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: position,
+                zoom: 10
+            });
 
-            render: function() {
-                this.$el.html(getMap(this.position));
-                return this;
-            }
-        });
-
-        function getMap(position) {
-            var map = new google.maps.Map($('.map'), {
-                center: new google.maps.LatLng(position['lattitude'], position['longitude']),
-                zoom: 8
+            var marker = new google.maps.Marker({
+                position: position,
+                map: map,
             });
         }
 
@@ -193,5 +202,6 @@
 
         Backbone.history.start();
     </script>
-</body>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZVrpwoAbKCzpjtspToqCHbUICoOq9ybs"></script>
+  </body>
 </html>
