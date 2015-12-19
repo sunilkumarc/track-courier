@@ -20,22 +20,63 @@
                   <div class="panel-heading">Summary</div>
                   <div class="panel-body">
                     <div class="parcel-summary"></div>
+                    <div class="my-map"></div>
                   </div>
               </div>
           </div>
         </div>
     </div>
 
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.2/underscore-min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.2/underscore-min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.2/backbone-min.js"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZVrpwoAbKCzpjtspToqCHbUICoOq9ybs&sensor=false"></script>
 
     <script type="text/template" id="parcels-short-details">
         <ul class="list-group">
         <% _.each(parcels, function(parcel) { %>
-            <li class="list-group-item"><%= htmlEncode(parcel.get('name')) %></li>
+            <a class="parcel-link"><li class="list-group-item"><%= htmlEncode(parcel.get('name')) %></li></a>
         <% }); %>
         </ul>
+    </script>
+
+    <script type="text/template" id="map-view">
+        <div class="panel panel-default">
+            <div class="panel-body">
+              <div><%= htmlEncode(position['lat']) %>, <%= htmlEncode(position['lng']) %></div>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="parcel-full-details">
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th>Name</th>
+                    <td><%= htmlEncode(parcel.get('name')) %></td>
+                </tr>
+                <tr>
+                    <th>From</th>
+                    <td><%= htmlEncode(parcel.get('from')) %></td>
+                </tr>
+                <tr>
+                    <th>Destination</th>
+                    <td><%= htmlEncode(parcel.get('to')) %></td>
+                </tr>
+                <tr>
+                    <th>Dispatched On</th>
+                    <td><%= htmlEncode(parcel.get('dispatched_on')) %></td>
+                </tr>
+                <tr>
+                    <th>Color</th>
+                    <td><%= htmlEncode(parcel.get('color')) %></td>
+                </tr>
+                <tr>
+                    <th>Weight</th>
+                    <td><%= htmlEncode(parcel.get('weight')) %></td>
+                </tr>
+            </tbody>
+        </table>
     </script>
 
     <script>
@@ -65,6 +106,9 @@
 
 
         /////////////// Models //////////////////////////
+        var Parcel = Backbone.Model.extend({
+            urlRoot: '/parcel'
+        });
 
 
         ////////////// Collections //////////////////////
@@ -84,12 +128,55 @@
                     success: function(parcels) {
                         var template = _.template($('#parcels-short-details').html(), {parcels: parcels.models});
                         that.$el.html(template);
+                        parcelSummaryView.render(parcels.models[0].get('_id'));
                     }
                 });
             }
         });
         var homeView = new HomeView();
 
+        var ParcelSummarView = Backbone.View.extend({
+            el: '.parcel-summary',
+
+            render: function(parcel_id) {
+                var that = this;
+                var parcel = new Parcel({id: parcel_id});
+
+                parcel.fetch({
+                    success: function(parcel) {
+                        var template = _.template($('#parcel-full-details').html(), {parcel: parcel});
+                        that.$el.html(template);
+                        var location = parcel.get('current_location');
+                        var position = {lat: Number(location['lattitude']), lng: Number(location['longitude'])};
+
+                        // var mapView = new MapView(position);
+                        // mapView.render();
+                        getMap(position);
+                    }
+                });
+            }
+        });
+        var parcelSummaryView = new ParcelSummarView();
+
+        var MapView = Backbone.View.extend({
+            el: $('.map'),
+
+            initialize: function(position) {
+                this.position = position;
+            },
+
+            render: function() {
+                this.$el.html(getMap(this.position));
+                return this;
+            }
+        });
+
+        function getMap(position) {
+            var map = new google.maps.Map($('.map'), {
+                center: new google.maps.LatLng(position['lattitude'], position['longitude']),
+                zoom: 8
+            });
+        }
 
         /////////////// Router //////////////////////////
         var Router = Backbone.Router.extend({

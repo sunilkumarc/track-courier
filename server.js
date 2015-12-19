@@ -45,6 +45,18 @@ server.get('/parcel/full_details', function(req, res) {
     });
 });
 
+server.get('/parcel/:id', function(req, res) {
+    var parcel_id = req.params.id;
+
+    Parcel.findOne({_id: parcel_id}).exec(function(err, parcel) {
+        if (parcel) {
+            res.send(parcel);
+        } else {
+            res.status(500).send('Something went wrong');
+        }
+    });
+});
+
 var port = Number(process.env.PORT || 8000)
 server.listen(port);
 console.log('Server started ...');
