@@ -1,15 +1,19 @@
 var express = require('express');
-var account_controller = require('./controllers/account');
-var courier_controller = require('./controllers/courier');
-var db_connection = require('./database');
+var account_controller = require('./controllers/accounts.js');
+var parcels_controller = require('./controllers/parcels.js');
+var db_connection = require('./models/database.js');
+var bodyParser = require('body-parser');
 var app = express();
+
+// Middleware to parse json body
+app.use(bodyParser.json());
 
 app.get('/', function(req, res) {
     res.status(200).send("Server Working!");
 });
 
 account_controller.set(app);
-courier_controller.set(app);
+parcels_controller.set(app);
 
 /*
 db_connection.query("INSERT INTO parcel(name, price, weight, from_location, " +

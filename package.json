@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/sunilkumarc/track-courier#readme",
   "dependencies": {
+    "body-parser": "^1.15.2",
     "express": "*",
-    "pg": "^6.0.3"
+    "pg": "^6.0.3",
+    "pg-promise": "^5.3.1"
   }
 }
