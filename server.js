@@ -1,62 +1,31 @@
 var express = require('express');
+var account_controller = require('./controllers/accounts.js');
+var parcels_controller = require('./controllers/parcels.js');
+var db_connection = require('./models/database.js');
 var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
-var cors = require('cors');
+var app = express();
 
-// Importing models
-var Parcel = require('./models/parcel');
+// Middleware to parse json body
+app.use(bodyParser.json());
 
-var server = express();
-
-// Middleware
-server.use(bodyParser.json());
-server.use(cors());
-
-// local mondodb database
-var db_url = 'mongodb://localhost:27017/track-courier';
-
-mongoose.connect(db_url, function(err, conn) {
-    if(err) {
-        console.log('Error while connecting to Mongoose : ' + err);
-    }
+app.get('/', function(req, res) {
+    res.status(200).send("Server Working!");
 });
 
-server.get('/', function(req, res){
-    res.status(200).send("Server Working Fine :D");
-});
+account_controller.set(app);
+parcels_controller.set(app);
 
-server.get('/parcels/short_details', function(req, res) {
-    Parcel.find().select('name price').exec(function(err, parcels) {
-        if (parcels) {
-            res.send(parcels);
-        } else {
-            res.status(500).send('Internal Server Error Occured');
-        }
-    });
-});
+/*
+db_connection.query("INSERT INTO parcel(name, price, weight, from_location, " +
+    "to_location, dispatched_on) values($1, $2, $3, $4, $5, $6)", ['sjsu_application',
+    12.41, 0.14, 'Bangalore, India', 'San Jose, California', '2016-10-10']);
+var query = db_connection.query('select * from parcel');
 
-server.get('/parcel/full_details', function(req, res) {
-    Parcel.find().exec(function(err, parcels) {
-        if (parcels) {
-            res.send(parcels);
-        } else {
-            res.status(500).send('Internal Server Error Occured');
-        }
-    });
+query.on('row', function(row) {
+    console.log(row);
 });
-
-server.get('/parcel/:id', function(req, res) {
-    var parcel_id = req.params.id;
-
-    Parcel.findOne({_id: parcel_id}).exec(function(err, parcel) {
-        if (parcel) {
-            res.send(parcel);
-        } else {
-            res.status(500).send('Something went wrong');
-        }
-    });
-});
+*/
 
 var port = Number(process.env.PORT || 8000)
-server.listen(port);
-console.log('Server started ...');
+app.listen(port);
+console.log('App running!');
