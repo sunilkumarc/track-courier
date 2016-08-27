@@ -20,6 +20,8 @@
     "body-parser": "^1.15.2",
     "express": "*",
     "pg": "^6.0.3",
-    "pg-promise": "^5.3.1"
+    "pg-hstore": "^2.3.2",
+    "pg-promise": "^5.3.1",
+    "sequelize": "^3.24.1"
   }
 }
