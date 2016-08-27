@@ -1,7 +1,15 @@
-var db_connection = require('../models/database.js');
+// var db_connection = require('../models/database.js');
 var random = require('../utilities/random_num_generator.js');
+var models = require('../models');
 
 module.exports.set = function(app) {
+    app.get("/test", function(req, res) {
+        models.Parcels.all().then(function(parcels) {
+            res.send(parcels);
+        });
+    });
+
+    /*
     app.get("/parcels/:id", function(req, res) {
         var result = null;
         var parcel_id = req.params.id;
@@ -55,4 +63,5 @@ module.exports.set = function(app) {
                     }
                 });
     });
+    */
 }
