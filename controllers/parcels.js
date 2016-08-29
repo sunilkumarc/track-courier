@@ -3,13 +3,6 @@ var random = require('../utilities/random_num_generator.js');
 var models = require('../models');
 
 module.exports.set = function(app) {
-    app.get("/test", function(req, res) {
-        models.Parcels.all().then(function(parcels) {
-            res.send(parcels);
-        });
-    });
-
-    /*
     app.get("/parcels/:id", function(req, res) {
         models.Parcels.findOne({ where: { parcel_id: req.params.id }}).then(function(parcel) {
             if (parcel)
@@ -75,5 +68,4 @@ module.exports.set = function(app) {
             res.status(500).send("Something went wrong. Couldn't save the data.");
         });
     });
-    */
 }
