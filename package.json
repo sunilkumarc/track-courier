@@ -18,7 +18,10 @@
   "homepage": "https://github.com/sunilkumarc/track-courier#readme",
   "dependencies": {
     "body-parser": "^1.15.2",
+    "cookie-parser": "^1.4.3",
     "express": "*",
+    "express-session": "^1.14.1",
+    "passport": "^0.3.2",
     "pg": "^6.0.3",
     "pg-hstore": "^2.3.2",
     "pg-promise": "^5.3.1",
