@@ -23,6 +23,7 @@
     "express": "*",
     "express-session": "^1.14.1",
     "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
     "pg": "^6.0.3",
     "pg-hstore": "^2.3.2",
     "pg-promise": "^5.3.1",
