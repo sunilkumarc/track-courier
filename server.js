@@ -4,9 +4,12 @@ var parcels_controller = require('./controllers/parcels.js');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
+var passport = require('passport');
+
 var app = express();
 
 // Middleware to parse json body
+app.use(passport.initialize());
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(session({
