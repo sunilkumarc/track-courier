@@ -3,7 +3,7 @@ var models = require('../models');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 
-passport.use(new LocalStrategy(function(username, password, done) {
+passport.use(new LocalStrategy({passReqToCallback : true}, function(req, username, password, done) {
     models.Accounts.findOne({ where: { username: username}}).then(function(user) {
         if (!user) {
             console.log('Unkown User');
@@ -13,13 +13,14 @@ passport.use(new LocalStrategy(function(username, password, done) {
         bcrypt.compare(password, user.password, function(err, isMatch) {
             if (err) throw err;
             if (isMatch) {
+                req.session.username = req.body.username;
                 return done(null, user);
             } else {
                 return done(null, false, {message: 'Invalid Password'});
             }
         });
     }).catch(function(err) {
-        res.status(500).send("Internal Server Error");
+        return done(null, false);
     });
 }));
 
@@ -48,7 +49,7 @@ module.exports.set = function(app) {
     }));
 
     app.get('/accounts/logout', function(req, res) {
-        req.logout();
+        req.session.destroy();
         res.redirect('/accounts/login');
     });
 

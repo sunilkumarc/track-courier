@@ -16,7 +16,7 @@ app.use(cookieParser());
 app.use(session({
     secret: 'track_courier_application_secret_key',
     cookie: {
-        maxAge: 300000
+        maxAge: 60000
     },
     saveUninitialized: true,
     resave: true
