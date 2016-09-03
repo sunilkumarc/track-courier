@@ -7,16 +7,28 @@ var session = require('express-session');
 var passport = require('passport');
 
 var app = express();
+var user_session = null;
 
 // Middleware to parse json body
 app.use(passport.initialize());
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(session({
-    secret: 'secret_key',
+    secret: 'track_courier_application_secret_key',
+    cookie: {
+        maxAge: 300000
+    },
     saveUninitialized: true,
     resave: true
 }));
+
+app.all('*parcels*', function(req, res, next) {
+    if (req.session.username) {
+        next();
+    } else {
+        next(new Error(401));
+    }
+});
 
 app.get('/', function(req, res) {
     res.status(200).send("Server Working!");

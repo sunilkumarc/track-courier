@@ -42,10 +42,10 @@ module.exports.set = function(app) {
         res.status(200).send('Logged in dude!');
     });
 
-    app.post('/accounts/login',
-        passport.authenticate('local', {successRedirect: '/accounts/loggedin', failureRedirect: '/accounts/login'}), function(req, res, err) {
-            res.status(200).send("Account Details Page");
-    });
+    app.post('/accounts/login', passport.authenticate('local', {
+        successRedirect: '/accounts/loggedin',
+        failureRedirect: '/accounts/login'
+    }));
 
     app.get('/accounts/logout', function(req, res) {
         req.logout();
@@ -63,6 +63,7 @@ module.exports.set = function(app) {
             email_id: body.email_id,
             password: hash
         }).then(function(account) {
+            req.session.username = body.username;
             res.status(201).send(account);
         }).catch(function(err) {
             res.status(500).send("Something went wrong. Couldn't save the data.");
