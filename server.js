@@ -9,7 +9,7 @@ var passport = require('passport');
 var app = express();
 var user_session = null;
 
-// Middleware to parse json body
+// Middlewares
 app.use(passport.initialize());
 app.use(bodyParser.json());
 app.use(cookieParser());
