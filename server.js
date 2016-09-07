@@ -39,4 +39,4 @@ parcels_controller.set(app);
 
 var port = Number(process.env.PORT || 8000)
 app.listen(port);
-console.log('App running!');
+console.log('Track-Courier Up and Running!');
