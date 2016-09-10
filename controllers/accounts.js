@@ -36,7 +36,7 @@ passport.deserializeUser(function (username, done) {
 
 module.exports.set = function(app) {
     app.get('/accounts/login', function(req, res) {
-        res.status(200).send('You\'ve got to login again!');
+        res.status(401).send('You\'ve got to login again!');
     });
 
     app.get('/accounts/loggedin', function(req, res) {
@@ -44,8 +44,7 @@ module.exports.set = function(app) {
     });
 
     app.post('/accounts/login', passport.authenticate('local', {
-        successRedirect: '/accounts/loggedin',
-        failureRedirect: '/accounts/login'
+        successRedirect: '/accounts/loggedin'
     }));
 
     app.get('/accounts/logout', function(req, res) {
