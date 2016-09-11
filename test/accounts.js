@@ -1,7 +1,30 @@
 var expect  = require("chai").expect;
 var request = require("request");
+var sinon = require('sinon');
+var Accounts = require('../models').Accounts;
 
 describe("Accounts controller", function() {
+    // beforeEach(function() {
+    //     sinon.stub(Accounts, 'create', function(req, res) {
+    //         console.log('Inside stubbed method! :D');
+    //         // done(100);
+    //         console.log(req);
+    //     })
+    // });
+    //
+    // afterEach(function() {
+    //     Accounts.create().restore();
+    // });
+    //
+    // describe("Test Stubbing using sinon.js", function() {
+    //     it("Test Accounts.create", function(done) {
+    //         Accounts.create(function(res) {
+    //             expect(res).to.equal(100);
+    //             done();
+    //         });
+    //     });
+    // });
+
     describe("Test Login", function() {
         var url = "http://localhost:8000/accounts/login";
         it("Successful login and expect 302 - success redirect", function(done) {
