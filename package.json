@@ -18,6 +18,7 @@
   "homepage": "https://github.com/sunilkumarc/track-courier#readme",
   "dependencies": {
     "bcryptjs": "^2.3.0",
+    "bluebird": "^3.4.6",
     "body-parser": "^1.15.2",
     "chai": "^3.5.0",
     "cookie-parser": "^1.4.3",

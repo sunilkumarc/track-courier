@@ -1,13 +1,42 @@
 var expect  = require("chai").expect;
 var request = require("request");
-var sinon = require('sinon');
 var Accounts = require('../models').Accounts;
-var low = require('lowdb');
-var db = low('db.json');
-
-db.defaults({ Accounts: [] }).value();
+var Promise = require('bluebird');
+// var low = require('lowdb');
+// var db = low('db.json');
+var sinon = require('sinon');
+// var sinonStubPromise = require('sinon-stub-promise');
+// sinonStubPromise(sinon);
 
 describe("Accounts controller", function() {
+
+    describe("When called register with request body", () => {
+        it("It should mock register endpoint with success", (done) => {
+            // var account = { username: "test_user", name: "Test User", email_id:"test@gmail.com",password: "test" };
+            // var create = sinon.stub(Accounts, 'create').returnsPromise();
+            // create.resolves(account);
+            // sinon.stub(Accounts, 'create', (req, res) => {
+            //    console.log('Inside stubbed method! :D');
+            // });
+            var sandbox; var accountsStub;
+            sandbox = sinon.sandbox.create();
+            accountsStub = sandbox.stub(Accounts, 'create');
+            accountsStub.returns(Promise.resolve('Working'));
+
+            request.post({
+                headers: {'content-type' : 'application/json'},
+                url: 'http://localhost:8000/accounts/register',
+                body: "{ \"username\": \"test_user2\", \"name\": \"Test User\", \"email_id\":\"test2@gmail.com\", \"password\": \"test\" }"
+            }, (err, response, body) => {
+                expect(err).to.not.be.ok;
+                console.log(body);
+            });
+
+            // Accounts.create().restore();
+            accountsStub.restore();
+            done();
+        })
+    });
     /*
     describe("Test Stubbing using sinon.js", function() {
         it("Test Accounts.create", function(done) {

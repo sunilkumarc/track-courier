@@ -64,10 +64,11 @@ module.exports.set = function(app) {
             email_id: body.email_id,
             password: hash
         }).then(function(account) {
+            console.log('promise.then');
             req.session.username = body.username;
             res.status(201).send(account);
         }).catch(function(err) {
-            console.log("Oh ho!");
+            console.log("promise.catch");
             res.status(500).send("Something went wrong. Couldn't save the data.");
         });
     });
