@@ -57,6 +57,7 @@ module.exports.set = function(app) {
         var salt = bcrypt.genSaltSync(10);
         var hash = bcrypt.hashSync(body.password, salt);
 
+        console.log(body);
         models.Accounts.create({
             username: body.username,
             name: body.name,
@@ -66,6 +67,7 @@ module.exports.set = function(app) {
             req.session.username = body.username;
             res.status(201).send(account);
         }).catch(function(err) {
+            console.log("Oh ho!");
             res.status(500).send("Something went wrong. Couldn't save the data.");
         });
     });
