@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Hotel Browsing</title>
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.1.1/css/bootstrap.min.css">
+</head>
+<body>
+
+    <!-- Container where the different pages will be loaded -->
+    <div class="container">
+        <h1>Track Courier</h1>
+        <hr/>
+        <div class="home-page"></div>
+    </div>
+
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.2/underscore-min.js" type="text/javascript"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.2/backbone-min.js"></script>
+
+    <!-- Home Page -->
+    <script type="text/template" id="home-page">
+        <h3>Home Page</h3>
+        <a href="#login" class="btn btn-primary">Login</a>
+        <a href="#signup" class="btn btn-primary">Signup</a>
+    </script>
+
+    <!-- Login Page -->
+    <script type="text/template" id="login-page">
+        <h3>Login Page</h3>
+        <a href="" class="btn btn-primary">Back</a>
+    </script>
+
+    <!-- Signup Page -->
+    <script type="text/template" id="signup-page">
+        <h3>Signup Page</h3>
+        <a href="" class="btn btn-primary">Back</a>
+    </script>
+
+    <script>
+        $.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
+            options.url = 'http://localhost:8000' + options.url;
+        });
+        function htmlEncode(value){
+          return $('<div/>').text(value).html();
+        }
+        $.fn.serializeObject = function() {
+          var o = {};
+          var a = this.serializeArray();
+          $.each(a, function() {
+              if (o[this.name] !== undefined) {
+                  if (!o[this.name].push) {
+                      o[this.name] = [o[this.name]];
+                  }
+                  o[this.name].push(this.value || '');
+              } else {
+                  o[this.name] = this.value || '';
+              }
+          });
+          return o;
+        };
+
+        ////////////// Views ////////////////////////////
+        var LoginView = Backbone.View.extend({
+            el: '.home-page',
+
+            render: function() {
+                var template = _.template($('#login-page').html());
+                this.$el.html(template);
+            }
+        });
+        var loginView = new LoginView();
+
+        var SignupView = Backbone.View.extend({
+            el: '.home-page',
+
+            render: function() {
+                var template = _.template($('#signup-page').html());
+                this.$el.html(template);
+            }
+        });
+        var signupView = new SignupView();
+
+        var HomePageView = Backbone.View.extend({
+            el: '.home-page',
+
+            render: function() {
+                var template = _.template($('#home-page').html());
+                this.$el.html(template);
+            }
+        });
+        var homePageView = new HomePageView();
+
+        /////////////// Router ///////////////////////////
+        var Router = Backbone.Router.extend({
+            routes: {
+                "": "home",
+                "login": "login",
+                "signup": "signup"
+            }
+        });
+        var router = new Router;
+
+        router.on('route:home', function() {
+            homePageView.render();
+        });
+
+        router.on('route:login', function() {
+            loginView.render();
+        });
+
+        router.on('route:signup', function() {
+            signupView.render();
+        });
+
+        Backbone.history.start();
+    </script>
+</body>
+</html>

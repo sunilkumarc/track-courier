@@ -1,4 +1,6 @@
-var expect  = require("chai").expect;
+var chai  = require("chai");
+var expect = chai.expect;
+var should = chai.should;
 var request = require("request");
 var Accounts = require('../models').Accounts;
 var Promise = require('bluebird');
@@ -12,7 +14,7 @@ describe("Accounts controller", function() {
 
     describe("When called register with request body", () => {
         it("It should mock register endpoint with success", (done) => {
-            // var account = { username: "test_user", name: "Test User", email_id:"test@gmail.com",password: "test" };
+            var account = { username: "test_user", name: "Test User", email_id:"test@gmail.com",password: "test" };
             // var create = sinon.stub(Accounts, 'create').returnsPromise();
             // create.resolves(account);
             // sinon.stub(Accounts, 'create', (req, res) => {
@@ -21,7 +23,7 @@ describe("Accounts controller", function() {
             var sandbox; var accountsStub;
             sandbox = sinon.sandbox.create();
             accountsStub = sandbox.stub(Accounts, 'create');
-            accountsStub.returns(Promise.resolve('Working'));
+            accountsStub.returns(Promise.reject(account));
 
             request.post({
                 headers: {'content-type' : 'application/json'},
@@ -29,7 +31,6 @@ describe("Accounts controller", function() {
                 body: "{ \"username\": \"test_user2\", \"name\": \"Test User\", \"email_id\":\"test2@gmail.com\", \"password\": \"test\" }"
             }, (err, response, body) => {
                 expect(err).to.not.be.ok;
-                console.log(body);
             });
 
             // Accounts.create().restore();
