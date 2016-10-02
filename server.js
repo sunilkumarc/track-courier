@@ -5,11 +5,18 @@ var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var passport = require('passport');
+var cors = require('cors');
 
 var app = express();
 var user_session = null;
 
 // Middlewares
+app.all('*', function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    next();
+});
+app.use(cors());
 app.use(passport.initialize());
 app.use(bodyParser.json());
 app.use(cookieParser());

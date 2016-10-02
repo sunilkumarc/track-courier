@@ -28,13 +28,42 @@
     <!-- Login Page -->
     <script type="text/template" id="login-page">
         <h3>Login Page</h3>
-        <a href="" class="btn btn-primary">Back</a>
+        <form class="login-form">
+            <label>Username</label>
+            <input type="text" name="username" /><span class="username" style="color: red"/>
+
+            <label>Password</label>
+            <input type="text" name="password" /><span class="password" style="color: red"/>
+            <br/>
+
+            <button type="submit" class="btn btn-primary">Login</button>
+            <a href="" class="btn btn-primary">Back</a>
+        </form>
     </script>
 
     <!-- Signup Page -->
     <script type="text/template" id="signup-page">
         <h3>Signup Page</h3>
         <a href="" class="btn btn-primary">Back</a>
+    </script>
+
+    <script>
+    function validate(user) {
+        username = user.username.trim();
+        pass = user.password.trim();
+        $('.username').html("");
+        $('.password').html("");
+
+        if (username === "") {
+            $('.username').html('Username cannot be empty');
+
+            if (pass === "") {
+                $('.password').html('Password cannot be empty');
+            }
+            return false;
+        }
+        return true;
+    }
     </script>
 
     <script>
@@ -60,9 +89,35 @@
           return o;
         };
 
+        /////////////// Models /////////////////////////
+        var User = Backbone.Model.extend({
+            urlRoot: '/accounts/login'
+        });
+
         ////////////// Views ////////////////////////////
         var LoginView = Backbone.View.extend({
             el: '.home-page',
+
+            events: {
+                'submit .login-form': 'login'
+            },
+
+            login: function(ev) {
+                ev.preventDefault();
+                var userDetails = $(ev.currentTarget).serializeObject();
+                if(validate(userDetails)) {
+                    var user = new User();
+                    user.save(userDetails, {
+                        success: function(userDetails) {
+                            console.log("Logged in successfully");
+                        },
+
+                        error: function(err) {
+                            console.log("Error in logging");
+                        }
+                    });
+                }
+            },
 
             render: function() {
                 var template = _.template($('#login-page').html());

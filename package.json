@@ -22,6 +22,7 @@
     "body-parser": "^1.15.2",
     "chai": "^3.5.0",
     "cookie-parser": "^1.4.3",
+    "cors": "^2.8.1",
     "express": "*",
     "express-session": "^1.14.1",
     "lodash": "^4.16.1",
