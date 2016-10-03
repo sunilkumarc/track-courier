@@ -35,10 +35,6 @@ passport.deserializeUser(function (username, done) {
 });
 
 module.exports.set = function(app) {
-    app.get('/accounts/login', function(req, res) {
-        res.status(401).send('You\'ve got to login again!');
-    });
-
     app.get('/accounts/loggedin', function(req, res) {
         res.status(200).send('Logged in dude!');
     });
