@@ -12,6 +12,7 @@
         <h1>Track Courier</h1>
         <hr/>
         <div class="home-page"></div>
+        <div class="courier-details"></div>
     </div>
 
     <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
@@ -20,9 +21,17 @@
 
     <!-- Home Page -->
     <script type="text/template" id="home-page">
-        <h3>Home Page</h3>
         <a href="#login" class="btn btn-primary">Login</a>
         <a href="#signup" class="btn btn-primary">Signup</a>
+        <br>
+
+        <h3>Track Your Courier</h3>
+        <form class="track-courier-form">
+            <label>Courier Id</label>
+            <input type="text" name="courier" class='courier-id'/>
+            <br/>
+            <button type="submit" class="btn btn-primary">Track</button>
+        </form>
     </script>
 
     <!-- Login Page -->
@@ -44,6 +53,60 @@
     <!-- Signup Page -->
     <script type="text/template" id="signup-page">
         <h3>Signup Page</h3>
+        <a href="" class="btn btn-primary">Back</a>
+    </script>
+
+    <!-- Courier Details -->
+    <script type="text/template" id="courier-details">
+        <h3>Courier Details</h3>
+        <table class="table table-bordered">
+          <tbody>
+              <tr>
+                  <th>Parcel ID</th>
+                  <td><%= htmlEncode(parcel.get('parcel_id')) %></td>
+              </tr>
+              <tr>
+                  <th>From Person</th>
+                  <td><%= htmlEncode(parcel.get('from_person_name')) %></td>
+              </tr>
+              <tr>
+                  <th>To Person</th>
+                  <td><%= htmlEncode(parcel.get('to_person_name')) %></td>
+              </tr>
+              <tr>
+                  <th>Color</th>
+                  <td><%= htmlEncode(parcel.get('color')) %></td>
+              </tr>
+              <tr>
+                  <th>Weight</th>
+                  <td><%= htmlEncode(parcel.get('weight')) %></td>
+              </tr>
+              <tr>
+                  <th>Dispatched On</th>
+                  <td><%= htmlEncode(parcel.get('dispatched_on')) %></td>
+              </tr>
+              <tr>
+                  <th>Expected Delivery</th>
+                  <td><%= htmlEncode(parcel.get('expected_delivery')) %></td>
+              </tr>
+              <tr>
+                  <th>Sender Address</th>
+                  <td><%= htmlEncode(parcel.get('sender_address')) %></td>
+              </tr>
+              <tr>
+                  <th>Receiver Address</th>
+                  <td><%= htmlEncode(parcel.get('receiver_address')) %></td>
+              </tr>
+              <tr>
+                  <th>Sender Phone No</th>
+                  <td><%= htmlEncode(parcel.get('sender_phone_no')) %></td>
+              </tr>
+              <tr>
+                  <th>Receiver Phone No</th>
+                  <td><%= htmlEncode(parcel.get('receiver_phone_no')) %></td>
+              </tr>
+          </tbody>
+        </table>
         <a href="" class="btn btn-primary">Back</a>
     </script>
 
@@ -94,6 +157,10 @@
             urlRoot: '/accounts/login'
         });
 
+        var Courier = Backbone.Model.extend({
+            urlRoot: '/parcels'
+        });
+
         ////////////// Views ////////////////////////////
         var LoginView = Backbone.View.extend({
             el: '.home-page',
@@ -110,10 +177,11 @@
                     user.save(userDetails, {
                         success: function(userDetails) {
                             console.log("Logged in successfully");
+                            router.navigate('/', true);
                         },
 
                         error: function(err) {
-                            console.log("Error in login");
+                            console.log(err);
                         }
                     });
                 }
@@ -136,8 +204,41 @@
         });
         var signupView = new SignupView();
 
+        var CourierDetailsView = Backbone.View.extend({
+            el: '.courier-details',
+
+            render: function(courierId) {
+                var that = this;
+                var courier = new Courier({id: courierId});
+                courier.fetch({
+                    success: function(parcel) {
+                        console.log(parcel.get('from_person_name'));
+                        var template = _.template($('#courier-details').html(), {parcel: parcel});
+                        that.$el.html(template);
+                    },
+
+                    error: function(err) {
+                        that.$el.html("<h3>Invalid Courier ID</h3><a href=\"\" class=\"btn btn-primary\">Back</a>");
+                    }
+                });
+
+            }
+        });
+        var courierDetailsView = new CourierDetailsView();
+
         var HomePageView = Backbone.View.extend({
             el: '.home-page',
+
+            events: {
+                'submit .track-courier-form': 'track'
+            },
+
+            track: function(ev) {
+                ev.preventDefault();
+                var courierId = $(ev.currentTarget).serializeObject().courier;
+                courierDetailsView.render(courierId);
+                this.$el.html('');
+            },
 
             render: function() {
                 var template = _.template($('#home-page').html());
@@ -151,7 +252,8 @@
             routes: {
                 "": "home",
                 "login": "login",
-                "signup": "signup"
+                "signup": "signup",
+                "courier-details": "details"
             }
         });
         var router = new Router;
@@ -166,6 +268,11 @@
 
         router.on('route:signup', function() {
             signupView.render();
+        });
+
+        router.on('route:details', function() {
+            homePageView.clear();
+            courierDetailsView.render();
         });
 
         Backbone.history.start();

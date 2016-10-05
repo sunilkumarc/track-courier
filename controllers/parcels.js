@@ -12,7 +12,7 @@ module.exports.set = function(app) {
                 // So returning 500 for now. It will be fixed later.
                 res.status(500).send("Couldn't find the Parcel");
         }).catch(function(err) {
-            res.status(500).send("Something went wrong");
+            res.status(500).send(err);
         });
     });
 

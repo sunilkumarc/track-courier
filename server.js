@@ -21,7 +21,7 @@ app.use(express.static(path.join(__dirname, './')));
 app.use(session({
     secret: 'track_courier_application_secret_key',
     cookie: {
-        maxAge: 60000
+        maxAge: 300000
     },
     saveUninitialized: true,
     resave: true
@@ -31,7 +31,7 @@ app.all('*parcels*', function(req, res, next) {
     if (req.session.username) {
         next();
     } else {
-        next(new Error(401));
+        res.status(401).send("Unauthorized Macha");
     }
 });
 

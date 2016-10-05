@@ -35,13 +35,9 @@ passport.deserializeUser(function (username, done) {
 });
 
 module.exports.set = function(app) {
-    app.get('/accounts/loggedin', function(req, res) {
-        res.status(200).send('Logged in dude!');
+    app.post('/accounts/login', passport.authenticate('local'), function(req, res) {
+        res.status(200).send(req.user);
     });
-
-    app.post('/accounts/login', passport.authenticate('local', {
-        successRedirect: '/accounts/loggedin'
-    }));
 
     app.get('/accounts/logout', function(req, res) {
         req.session.destroy();
