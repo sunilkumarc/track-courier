@@ -3,8 +3,8 @@
 var fs        = require("fs");
 var path      = require("path");
 var Sequelize = require("sequelize");
-var sequelize = new Sequelize("track-courier", "postgres", "hello@123", {
-    host: process.env.POSTGRESQL_LOCAL_HOST,
+var sequelize = new Sequelize("vrgidbde", "vrgidbde", "9r1Fsxx9QDEy9duQcQbDUl7lFQqMZXW3", {
+    host: 'tantor.db.elephantsql.com',
     dialect: 'postgres',
     dialectOptions: {
         ssl: false

@@ -2,3 +2,4 @@ node_modules
 database.js
 queries.txt
 db.json
+*.png

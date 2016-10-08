@@ -4,7 +4,8 @@
   "description": "A nodejs application to track couriers.",
   "main": "server.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha --reporter spec"
+    "test": "./node_modules/.bin/mocha --reporter spec",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -30,6 +31,7 @@
     "mocha": "^3.0.2",
     "node-inspector": "^0.12.8",
     "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
     "pg": "^6.0.3",
     "pg-hstore": "^2.3.2",
     "pg-promise": "^5.3.1",

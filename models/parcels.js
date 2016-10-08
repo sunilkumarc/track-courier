@@ -34,10 +34,10 @@ module.exports = function(sequelize, DataTypes) {
             type: DataTypes.STRING
         },
         current_location_lat: {
-            type: DataTypes.DOUBLE
+            type: DataTypes.STRING
         },
         current_location_long: {
-            type: DataTypes.DOUBLE
+            type: DataTypes.STRING
         },
         sender_phone_no: {
             type: DataTypes.STRING
