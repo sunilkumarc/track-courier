@@ -17,11 +17,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.2/underscore-min.js" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.2/backbone-min.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
     <!-- Home Page -->
     <script type="text/template" id="home-page">
-        <a href="#login" class="btn btn-primary">Login</a>
-        <a href="#signup" class="btn btn-primary">Signup</a>
+        <a href="login" class="btn btn-primary">Login</a>
+        <a href="signup" class="btn btn-primary">Signup</a>
         <br>
 
         <h3>Track Your Courier</h3>
@@ -207,9 +207,9 @@
         var CourierDetailsView = Backbone.View.extend({
             el: '.courier-details',
 
-            loadMap: function() {
+            loadMap: function(lat, long) {
                 var mapCanvas = document.getElementsByClassName('map')[0];
-                var myLatLng = {lat: 12.9716, lng: 77.5946};
+                var myLatLng = {lat: parseFloat(lat), lng: parseFloat(long)};
                 var mapOptions = {
                     center: myLatLng,
                     zoom: 13
@@ -219,7 +219,7 @@
                 var marker = new google.maps.Marker({
                     position: myLatLng,
                     map: map,
-                    title: 'Hello World!'
+                    title: "You're parcel is here!"
                 });
             },
 
@@ -228,16 +228,15 @@
                 var courier = new Courier({id: courierId});
                 courier.fetch({
                     success: function(parcel) {
-                        console.log(parcel.get('from_person_name'));
                         var template = _.template($('#courier-details').html(), {parcel: parcel});
                         that.$el.html(template);
-                        that.loadMap();
+                        that.loadMap(parcel.get('current_location_lat'), parcel.get('current_location_long'));
                     },
 
                     error: function(err, response) {
                         console.log(response.status);
                         if (response.status == 401)
-                            that.$el.html("<h3>Not Logged In. Please Login.</h3><a href=\"\" class=\"btn btn-primary\">Back</a>")
+                            that.$el.html("<h3>Not Logged In. Please Login.</h3><a href=\"/\" class=\"btn btn-primary\">Back</a>")
                         else
                             that.$el.html("<h3>Invalid Courier ID</h3><a href=\"\" class=\"btn btn-primary\">Back</a>");
                     }
@@ -257,7 +256,8 @@
             track: function(ev) {
                 ev.preventDefault();
                 var courierId = $(ev.currentTarget).serializeObject().courier;
-                courierDetailsView.render(courierId);
+                // courierDetailsView.render(courierId);
+                router.navigate('/courier-details/' + courierId, true);
                 this.$el.html('');
             },
 
@@ -274,7 +274,7 @@
                 "": "home",
                 "login": "login",
                 "signup": "signup",
-                "courier-details": "details"
+                "courier-details/:id": "courier-details"
             }
         });
         var router = new Router;
@@ -291,12 +291,18 @@
             signupView.render();
         });
 
-        router.on('route:details', function() {
-            homePageView.clear();
-            courierDetailsView.render();
+        router.on('route:courier-details', function(id) {
+            courierDetailsView.render(id);
         });
 
-        Backbone.history.start();
+        // Backbone.history.start();
+        Backbone.history.start({ pushState: true });
+
+        $(document).on("click", "a", function(e) {
+            e.preventDefault();
+            var href = $(e.currentTarget).attr('href');
+            router.navigate(href, true);
+        });
     </script>
 </body>
 </html>
