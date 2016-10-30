@@ -12,6 +12,7 @@
         <hr/>
         <div class="home-page"></div>
         <div class="courier-details"></div>
+        <div class="dashboard"></div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
@@ -20,8 +21,12 @@
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
     <!-- Home Page -->
     <script type="text/template" id="home-page">
-        <a href="login" class="btn btn-primary">Login</a>
-        <a href="signup" class="btn btn-primary">Signup</a>
+        <% if (window.localStorage.getItem('userDetails') == null) { %>
+            <a href="#login" class="btn btn-primary">Login</a>
+            <a href="#signup" class="btn btn-primary">Signup</a>
+        <% } else { %>
+            <button class="btn btn-primary logout">Logout</button>
+        <% } %>
         <br>
 
         <h3>Track Your Courier</h3>
@@ -41,7 +46,7 @@
             <input type="text" name="username" /><span class="username" style="color: red"/>
 
             <label>Password</label>
-            <input type="text" name="password" /><span class="password" style="color: red"/>
+            <input type="password" name="password" /><span class="password" style="color: red"/>
             <br/>
 
             <button type="submit" class="btn btn-primary">Login</button>
@@ -57,7 +62,7 @@
 
     <!-- Courier Details -->
     <script type="text/template" id="courier-details">
-        <h3>Courier Details</h3>
+        <h3>Courier Details</h3><hr/>
         <table class="table table-bordered">
           <tbody>
               <tr>
@@ -106,7 +111,7 @@
               </tr>
           </tbody>
         </table>
-        <div class="map" style="width:100%;height:500px"></div>
+        <div class="map" style="width:80%;height:300px"></div><br/>
         <a href="" class="btn btn-primary">Back</a>
     </script>
 
@@ -154,7 +159,7 @@
 
         /////////////// Models /////////////////////////
         var User = Backbone.Model.extend({
-            urlRoot: '/accounts/login'
+            urlRoot: '/accounts/'
         });
 
         var Courier = Backbone.Model.extend({
@@ -174,9 +179,10 @@
                 var userDetails = $(ev.currentTarget).serializeObject();
                 if(validate(userDetails)) {
                     var user = new User();
+                    user.urlRoot += 'login';
                     user.save(userDetails, {
                         success: function(userDetails) {
-                            console.log("Logged in successfully");
+                            console.log(window.localStorage.setItem('userDetails', userDetails));
                             router.navigate('/', true);
                         },
 
@@ -241,27 +247,58 @@
                             that.$el.html("<h3>Invalid Courier ID</h3><a href=\"\" class=\"btn btn-primary\">Back</a>");
                     }
                 });
-
             }
         });
         var courierDetailsView = new CourierDetailsView();
+
+        var DashBoardView = Backbone.View.extend({
+            el: '.dashboard',
+
+            render: function() {
+                this.$el.html('Dashboard Page');
+            }
+        });
+        var dashboardView = new DashBoardView();
 
         var HomePageView = Backbone.View.extend({
             el: '.home-page',
 
             events: {
-                'submit .track-courier-form': 'track'
+                'submit .track-courier-form': 'track',
+                'click .logout': 'logout'
+            },
+
+            logout: function(ev) {
+                if (window.localStorage.getItem('userDetails') == null)
+                    alert('User is not logged in');
+                else {
+                    var that = this;
+                    var user = new User();
+                    user.urlRoot += 'logout';
+                    user.fetch({
+                        dataType: 'text',
+                        success: function(respText, response) {
+                            window.localStorage.removeItem('userDetails');
+                            that.render();
+                            console.log('Logout Successful');
+                        },
+
+                        error: function(err, response) {
+                            console.log('Error in logging out');
+                        }
+                    });
+                }
             },
 
             track: function(ev) {
                 ev.preventDefault();
                 var courierId = $(ev.currentTarget).serializeObject().courier;
-                // courierDetailsView.render(courierId);
                 router.navigate('/courier-details/' + courierId, true);
                 this.$el.html('');
             },
 
             render: function() {
+                // Basically maintain some kind of global session object and check if the user is logged in.
                 var template = _.template($('#home-page').html());
                 this.$el.html(template);
             }
@@ -274,7 +311,8 @@
                 "": "home",
                 "login": "login",
                 "signup": "signup",
-                "courier-details/:id": "courier-details"
+                "courier-details/:id": "courier-details",
+                "dashboard": "dashboard"
             }
         });
         var router = new Router;
@@ -295,14 +333,18 @@
             courierDetailsView.render(id);
         });
 
-        // Backbone.history.start();
-        Backbone.history.start({ pushState: true });
-
-        $(document).on("click", "a", function(e) {
-            e.preventDefault();
-            var href = $(e.currentTarget).attr('href');
-            router.navigate(href, true);
+        router.on('route:dashboard', function() {
+            dashboardView.render();
         });
+
+        Backbone.history.start();
+        // Backbone.history.start({ pushState: true });
+        //
+        // $(document).on("click", "a", function(e) {
+        //     e.preventDefault();
+        //     var href = $(e.currentTarget).attr('href');
+        //     router.navigate(href, true);
+        // });
     </script>
 </body>
 </html>

@@ -27,13 +27,13 @@ app.use(session({
     resave: true
 }));
 
-app.all('*parcels*', function(req, res, next) {
-    if (req.session.username) {
-        next();
-    } else {
-        res.status(401).send("Unauthorized Macha");
-    }
-});
+// app.all('*parcels*', function(req, res, next) {
+//     if (req.session.username) {
+//         next();
+//     } else {
+//         res.status(401).send("Unauthorized Macha");
+//     }
+// });
 
 app.get('/', function(req, res) {
     res.status(200).send("Server Working!");

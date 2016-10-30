@@ -4,24 +4,24 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 
 passport.use(new LocalStrategy({passReqToCallback : true}, function(req, username, password, done) {
-    models.Accounts.findOne({ where: { username: username}}).then(function(user) {
-        if (!user) {
-            console.log('Unkown User');
-            return done(null, false, {message: 'Unknown User'});
-        }
-
-        bcrypt.compare(password, user.password, function(err, isMatch) {
-            if (err) throw err;
-            if (isMatch) {
-                req.session.username = req.body.username;
-                return done(null, user);
-            } else {
-                return done(null, false, {message: 'Invalid Password'});
+        models.Accounts.findOne({ where: { username: username}}).then(function(user) {
+            if (!user) {
+                console.log('Unkown User');
+                return done(null, false, {message: 'Unknown User'});
             }
+
+            bcrypt.compare(password, user.password, function(err, isMatch) {
+                if (err) throw err;
+                if (isMatch) {
+                    req.session.username = req.body.username;
+                    return done(null, user);
+                } else {
+                    return done(null, false, {message: 'Invalid Password'});
+                }
+            });
+        }).catch(function(err) {
+            return done(null, false);
         });
-    }).catch(function(err) {
-        return done(null, false);
-    });
 }));
 
 passport.serializeUser(function (user, done) {
@@ -35,13 +35,20 @@ passport.deserializeUser(function (username, done) {
 });
 
 module.exports.set = function(app) {
+    app.get('/accounts/isloggedin', function(req, res) {
+        if(req.session.username)
+            res.status(200).send('Hurray!');
+        else
+            res.status(401).send('User not logged in.');
+    });
+
     app.post('/accounts/login', passport.authenticate('local'), function(req, res) {
         res.status(200).send(req.user);
     });
 
     app.get('/accounts/logout', function(req, res) {
         req.session.destroy();
-        res.redirect('/accounts/login');
+        res.status(200).send('Logout Successful');
     });
 
     app.post('/accounts/register', function(req, res) {
