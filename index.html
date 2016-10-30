@@ -18,13 +18,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.2/underscore-min.js" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.2/backbone-min.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBahcCcZwj05QXi1AGOO1FlxRnfD05kaKU"></script>
     <!-- Home Page -->
     <script type="text/template" id="home-page">
         <% if (window.localStorage.getItem('userDetails') == null) { %>
             <a href="#login" class="btn btn-primary">Login</a>
             <a href="#signup" class="btn btn-primary">Signup</a>
         <% } else { %>
+            <a href="#dashboard" class="btn btn-primary">Manage Couriers</a>
             <button class="btn btn-primary logout">Logout</button>
         <% } %>
         <br>
@@ -36,6 +37,23 @@
             <br/>
             <button type="submit" class="btn btn-primary">Track</button>
         </form>
+    </script>
+
+    <script type="text/template" id="add-courier">
+        Add courier here
+        <a class="btn btn-primary back">Back</a>
+    </script>
+
+    <script type="text/template" id="update-courier">
+        Update courier here
+        <a class="btn btn-primary back">Back</a>
+    </script>
+
+    <script type="text/template" id="dashboard-page">
+        <h2>Welcome to your dashboard </h2>
+        <button class="btn btn-primary add-courier">Add Courier</button>
+        <button class="btn btn-primary update-courier">Update Courier</button>
+        <button class="btn btn-primary logout">Logout</button>
     </script>
 
     <!-- Login Page -->
@@ -176,14 +194,16 @@
 
             login: function(ev) {
                 ev.preventDefault();
+                var that = this;
                 var userDetails = $(ev.currentTarget).serializeObject();
                 if(validate(userDetails)) {
                     var user = new User();
                     user.urlRoot += 'login';
                     user.save(userDetails, {
                         success: function(userDetails) {
-                            console.log(window.localStorage.setItem('userDetails', userDetails));
-                            router.navigate('/', true);
+                            window.localStorage.setItem('userDetails', userDetails);
+                            that.$el.html('');
+                            router.navigate('/#dashboard', true);
                         },
 
                         error: function(err) {
@@ -194,6 +214,7 @@
             },
 
             render: function() {
+                $('.dashboard').html('');
                 var template = _.template($('#login-page').html());
                 this.$el.html(template);
             }
@@ -254,8 +275,54 @@
         var DashBoardView = Backbone.View.extend({
             el: '.dashboard',
 
+            events: {
+                'click .logout': 'logout',
+                'click .add-courier': 'addCourier',
+                'click .update-courier': 'updateCourier',
+                'click .back': 'back'
+            },
+
+            back: function(ev) {
+                var template = _.template($('#dashboard-page').html());
+                this.$el.html(template);
+            },
+
+            addCourier: function(ev) {
+                var template = _.template($('#add-courier').html());
+                this.$el.html(template);
+            },
+
+            updateCourier: function(ev) {
+                var template = _.template($('#update-courier').html());
+                this.$el.html(template);
+            },
+
+            logout: function(ev) {
+                var that = this;
+                var user = new User();
+                user.urlRoot += 'logout';
+                user.fetch({
+                    dataType: 'text',
+                    success: function(respText, response) {
+                        window.localStorage.removeItem('userDetails');
+                        that.$el.html('');
+                        router.navigate('/', true);
+                    },
+
+                    error: function(err, response) {
+                        console.log('Error in logging out');
+                    }
+                });
+            },
+
             render: function() {
-                this.$el.html('Dashboard Page');
+                if(window.localStorage.getItem('userDetails') == null)
+                    router.navigate('/#login', true);
+                else {
+                    $('.home-page').html('');
+                    var template = _.template($('#dashboard-page').html());
+                    this.$el.html(template);
+                }
             }
         });
         var dashboardView = new DashBoardView();
@@ -293,8 +360,8 @@
             track: function(ev) {
                 ev.preventDefault();
                 var courierId = $(ev.currentTarget).serializeObject().courier;
-                router.navigate('/courier-details/' + courierId, true);
                 this.$el.html('');
+                router.navigate('/courier-details/' + courierId, true);
             },
 
             render: function() {
