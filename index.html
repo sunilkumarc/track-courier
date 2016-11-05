@@ -4,6 +4,14 @@
     <meta charset="utf-8">
     <title>Track Courier</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.1.1/css/bootstrap.min.css">
+    <style>
+    /*.add-courier-table th, .add-courier-table td {
+        border-top: none;
+    }*/
+    /*.add-courier-table th {
+        margin-right: 0;
+    }*/
+    </style>
 </head>
 <body>
     <!-- Container where the different pages will be loaded -->
@@ -15,10 +23,34 @@
         <div class="dashboard"></div>
     </div>
 
+    <script>
+        var searchBox;
+        var courierLattitude;
+        var courierLongitude;
+        function initSearch() {
+            var input = document.getElementById('find-places');
+            searchBox = new google.maps.places.SearchBox(input);
+
+            searchBox.addListener('places_changed', function() {
+                var places = searchBox.getPlaces();
+                courierLattitude = places[0].geometry.location.lat();
+                courierLongitude = places[0].geometry.location.lng();
+            });
+        }
+
+        function generateCourierId(length) {
+            var text = "";
+            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            for(var i = 0; i < length; i++) {
+                text += possible.charAt(Math.floor(Math.random() * possible.length));
+            }
+            return text;
+        }
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.2/underscore-min.js" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.2/backbone-min.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBahcCcZwj05QXi1AGOO1FlxRnfD05kaKU"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBahcCcZwj05QXi1AGOO1FlxRnfD05kaKU&libraries=places"></script>
     <!-- Home Page -->
     <script type="text/template" id="home-page">
         <% if (window.localStorage.getItem('userDetails') == null) { %>
@@ -40,8 +72,58 @@
     </script>
 
     <script type="text/template" id="add-courier">
-        Add courier here
-        <a class="btn btn-primary back">Back</a>
+        <form class="add-courier-form">
+            <h3>Add Courier</h3>
+            <table class="table table-bordered">
+              <tbody>
+                  <tr>
+                      <th>From Person</th>
+                      <td><input type="text" name="from_person_name"/></td>
+                  </tr>
+                  <tr>
+                      <th>To Person</th>
+                      <td><input type="text" name="to_person_name"/></td>
+                  </tr>
+                  <tr>
+                      <th>Color</th>
+                      <td><input type="text" name="color"/></td>
+                  </tr>
+                  <tr>
+                      <th>Weight</th>
+                      <td><input type="text" name="weight" placeholder="In Kgs"/></td>
+                  </tr>
+                  <tr>
+                      <th>Dispatched On</th>
+                      <td><input type="date" name="dispatched_on"/></td>
+                  </tr>
+                  <tr>
+                      <th>Expected Delivery</th>
+                      <td><input type="date" name="expected_delivery"/></td>
+                  </tr>
+                  <tr>
+                      <th>Sender Address</th>
+                      <td><textarea name="sender_address"/></td>
+                  </tr>
+                  <tr>
+                      <th>Receiver Address</th>
+                      <td><textarea name="receiver_address"/></td>
+                  </tr>
+                  <tr>
+                      <th>Sender Phone No</th>
+                      <td><input type="text" name="sender_phone_no"/></td>
+                  </tr>
+                  <tr>
+                      <th>Receiver Phone No</th>
+                      <td><input type="text" name="receiver_phone_no"/></td>
+                  </tr>
+                  <tr>
+                      <th>Current Location</th>
+                      <td><input type="text" name="current_location" id="find-places" placeholder="Search Location"/></td>
+                  </tr>
+              </tbody>
+            </table>
+            <button type="submit" class="btn btn-primary">Add Courier</button>
+        </form>
     </script>
 
     <script type="text/template" id="update-courier">
@@ -134,9 +216,9 @@
     </script>
 
     <script>
-    function validate(user) {
-        username = user.username.trim();
-        pass = user.password.trim();
+    function validateUser(user) {
+        var username = user.username.trim();
+        var pass = user.password.trim();
         $('.username').html("");
         $('.password').html("");
 
@@ -146,6 +228,20 @@
             if (pass === "") {
                 $('.password').html('Password cannot be empty');
             }
+            return false;
+        }
+        return true;
+    }
+
+    function validateCourier(courier) {
+        var fromPerson = courier.from_person_name.trim();
+        var toPerson = courier.to_person_name.trim();
+        var receiverAddress = courier.receiver_address.trim();
+        var dispatchedOn = courier.dispatched_on.trim();
+        var expectedDelivery = courier.expected_delivery.trim();
+
+        if (fromPerson == "" || toPerson == "" || receiverAddress == "" || dispatchedOn == "" || expectedDelivery == "" || courierLattitude == 0 || courierLongitude == 0 || parseFloat(courier.weight.trim()) == NaN) {
+            console.log('Fill mandatory fields');
             return false;
         }
         return true;
@@ -196,7 +292,7 @@
                 ev.preventDefault();
                 var that = this;
                 var userDetails = $(ev.currentTarget).serializeObject();
-                if(validate(userDetails)) {
+                if(validateUser(userDetails)) {
                     var user = new User();
                     user.urlRoot += 'login';
                     user.save(userDetails, {
@@ -277,9 +373,33 @@
 
             events: {
                 'click .logout': 'logout',
-                'click .add-courier': 'addCourier',
+                'click .add-courier': 'loadAddCourierView',
                 'click .update-courier': 'updateCourier',
-                'click .back': 'back'
+                'click .back': 'back',
+                'submit .add-courier-form': 'addCourier'
+            },
+
+            addCourier: function(ev) {
+                ev.preventDefault();
+                var courier = new Courier();
+                var courierDetails = $(ev.currentTarget).serializeObject();
+                if (validateCourier(courierDetails)) {
+                    courierDetails.current_location_lat = courierLattitude;
+                    courierDetails.current_location_long = courierLongitude;
+                    courierDetails.parcel_id = generateCourierId(10);
+                    courierDetails.weight = parseFloat(courierDetails.weight);
+                    delete courierDetails.current_location;
+                    courier.save(courierDetails, {
+                        success: function(courierDetails) {
+                            alert('Added courier successfully!');
+                            router.navigate('/#dashboard', true);
+                        },
+
+                        error: function(err) {
+                            console.log(err);
+                        }
+                    });
+                }
             },
 
             back: function(ev) {
@@ -287,9 +407,12 @@
                 this.$el.html(template);
             },
 
-            addCourier: function(ev) {
+            loadAddCourierView: function(ev) {
+                courierLattitude = 0;
+                courierLongitude = 0;
                 var template = _.template($('#add-courier').html());
                 this.$el.html(template);
+                initSearch();
             },
 
             updateCourier: function(ev) {

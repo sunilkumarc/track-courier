@@ -47,7 +47,7 @@ module.exports.set = function(app) {
         var body = req.body;
 
         models.Parcels.create({
-            parcel_id : random(10),
+            parcel_id : body.parcel_id,
             from_person_name : body.from_person_name,
             to_person_name : body.to_person_name,
             color : body.color,
