@@ -16,13 +16,24 @@ module.exports.set = function(app) {
         });
     });
 
+    app.get("/parcels/all/ids", function(req, res) {
+        models.Parcels.findAll({attributes: ['parcel_id']}).then(function(parcels) {
+            if (parcels)
+                res.status(200).send(parcels);
+            else
+                res.status(500).send("Something went wrong");
+        });
+    });
+
     app.put("/parcels/:id", function(req, res) {
         var body = req.body;
 
         models.Parcels.findOne({ where: { parcel_id: req.params.id }}).then(function(parcel) {
             if (parcel) {
                 parcel.updateAttributes({
-                    expected_delivery: body.expected_delivery
+                    expected_delivery: body.expected_delivery,
+                    current_location_lat : body.new_location_lat,
+                    current_location_long : body.new_location_long,
                 });
                 res.status(200).send("Updated Successfully");
             } else {

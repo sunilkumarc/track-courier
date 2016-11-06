@@ -93,6 +93,10 @@
                       <td><input type="text" name="weight" placeholder="In Kgs"/></td>
                   </tr>
                   <tr>
+                      <th>Price</th>
+                      <td><input type="text" name="service_price" placeholder="in INR"/></td>
+                  </tr>
+                  <tr>
                       <th>Dispatched On</th>
                       <td><input type="date" name="dispatched_on"/></td>
                   </tr>
@@ -123,12 +127,26 @@
               </tbody>
             </table>
             <button type="submit" class="btn btn-primary">Add Courier</button>
+            <a class="btn btn-primary back">Back</a>
         </form>
     </script>
 
     <script type="text/template" id="update-courier">
-        Update courier here
-        <a class="btn btn-primary back">Back</a>
+        <form class="update-courier-form">
+            <label>Courier</label>
+            <select name="parcel_id">
+                <% _.each(courierIds, function(courier) { %>
+                    <option value="<%= courier.parcel_id%>"><%= courier.parcel_id%></option>
+                <% }); %>
+            </select>
+            <label>Expected Delivery</label>
+            <input type="date" name="expected_delivery"/><span class="new-expected-delivery" style="color: red"/>
+            <label>New Location</label>
+            <input type="text" name="new_location" id="find-places" placeholder="Search Location"/><span class="new-location" style="color: red"/>
+            <br/>
+            <button type="submit" class="btn btn-primary">Update Courier</button>
+            <a class="btn btn-primary back">Back</a>
+        </form>
     </script>
 
     <script type="text/template" id="dashboard-page">
@@ -136,6 +154,7 @@
         <button class="btn btn-primary add-courier">Add Courier</button>
         <button class="btn btn-primary update-courier">Update Courier</button>
         <button class="btn btn-primary logout">Logout</button>
+        <a href="/" class="btn btn-primary back">Back</a>
     </script>
 
     <!-- Login Page -->
@@ -211,6 +230,7 @@
               </tr>
           </tbody>
         </table>
+        <h5>Currency Location</h5>
         <div class="map" style="width:80%;height:300px"></div><br/>
         <a href="" class="btn btn-primary">Back</a>
     </script>
@@ -246,6 +266,23 @@
         }
         return true;
     }
+
+    function validateUpdateCourier(courier) {
+        var expectedDelivery = courier.expected_delivery.trim();
+        $('.new-expected-delivery').html('');
+        $('.new-location').html('');
+
+        if (expectedDelivery == "") {
+            $('.new-expected-delivery').html('Expected delivery cannot be empty');
+            return false;
+        }
+
+        if (courierLattitude == 0 && courierLongitude == 0) {
+            $('.new-location').html('Location cannot be empty');
+            return false;
+        }
+        return true;
+    }
     </script>
 
     <script>
@@ -277,7 +314,7 @@
         });
 
         var Courier = Backbone.Model.extend({
-            urlRoot: '/parcels'
+            urlRoot: '/parcels/'
         });
 
         ////////////// Views ////////////////////////////
@@ -374,9 +411,36 @@
             events: {
                 'click .logout': 'logout',
                 'click .add-courier': 'loadAddCourierView',
-                'click .update-courier': 'updateCourier',
+                'click .update-courier': 'loadUpdateCourierView',
                 'click .back': 'back',
-                'submit .add-courier-form': 'addCourier'
+                'submit .add-courier-form': 'addCourier',
+                'submit .update-courier-form': 'updateCourier'
+            },
+
+            updateCourier: function(ev) {
+                ev.preventDefault();
+                var courierDetails = $(ev.currentTarget).serializeObject();
+                if (validateUpdateCourier(courierDetails)) {
+                    var courier = new Courier();
+                    // courier.urlRoot += courierDetails.parcel_id;
+                    courierDetails.new_location_lat = courierLattitude;
+                    courierDetails.new_location_long = courierLongitude;
+                    delete courierDetails.new_location;
+                    courier.idAttribute = "parcel_id";
+
+                    courier.save(courierDetails, {
+                        dataType: 'text',
+
+                        success: function(courierDetails) {
+                            alert('Updated courier successfully!');
+                            router.navigate('/#dashboard', true);
+                        },
+
+                        error: function(err) {
+                            console.log(err);
+                        }
+                    });
+                }
             },
 
             addCourier: function(ev) {
@@ -415,9 +479,23 @@
                 initSearch();
             },
 
-            updateCourier: function(ev) {
-                var template = _.template($('#update-courier').html());
-                this.$el.html(template);
+            loadUpdateCourierView: function(ev) {
+                courierLattitude = 0;
+                courierLongitude = 0;
+                var that = this;
+                var courier = new Courier();
+                courier.urlRoot += "all/ids";
+                courier.fetch({
+                    success: function(courierIds) {
+                        var template = _.template($('#update-courier').html(), {courierIds:courierIds.attributes});
+                        that.$el.html(template);
+                        initSearch();
+                    },
+
+                    error: function(err, response) {
+                        console.log('Error in retrieving ids');
+                    }
+                });
             },
 
             logout: function(ev) {
