@@ -7,6 +7,7 @@ var session = require('express-session');
 var passport = require('passport');
 var cors = require('cors');
 var path = require('path');
+var server;
 
 var app = express();
 var user_session = null;
@@ -36,12 +37,24 @@ app.use(session({
 // });
 
 app.get('/', function(req, res) {
-    res.status(200).send("Server Working!");
+    res.status(200).send("Track Your Couriers!");
 });
 
 account_controller.set(app);
 parcels_controller.set(app);
 
-var port = Number(process.env.PORT || 8000)
-app.listen(port);
-console.log('Track-Courier Up and Running!');
+function startServer(port) {
+    var port = Number(process.env.PORT || port);
+    server = app.listen(port);
+}
+
+function stopServer() {
+    server.close();
+}
+
+startServer(8000);
+
+module.exports = {
+    startServer: startServer,
+    stopServer: stopServer
+}
