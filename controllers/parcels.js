@@ -4,7 +4,9 @@ var models = require('../models');
 
 module.exports.set = function(app) {
     app.get("/parcels/:id", function(req, res) {
+        console.log('Inside /parcels/:id');
         models.Parcels.findOne({ where: { parcel_id: req.params.id }}).then(function(parcel) {
+            console.log('Here too');
             if (parcel)
                 res.status(200).send(parcel);
             else
