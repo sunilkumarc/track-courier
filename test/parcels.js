@@ -44,7 +44,7 @@ describe('Test Couriers Controller', () => {
     describe('Calling /parcesls/empty', () => {
         it('should get 204 for \'empty\' parcel id', (done) => {
             getSingleParcel.withArgs('empty').returns(new Promise((resolve, reject) => {
-                reject('Parcel doesn\'t exists buddy');
+                resolve(null);
             }));
 
             request('http://localhost:9090/parcels/empty',  (error, response, body) => {
