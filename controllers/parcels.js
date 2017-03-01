@@ -1,20 +1,16 @@
 // var db_connection = require('../models/database.js');
 var random = require('../utilities/random_num_generator.js');
 var models = require('../models');
+var parcels = require('../dao/parcelsDAO');
 
 module.exports.set = function(app) {
     app.get("/parcels/:id", function(req, res) {
-        console.log('Inside /parcels/:id');
-        models.Parcels.findOne({ where: { parcel_id: req.params.id }}).then(function(parcel) {
-            console.log('Here too');
-            if (parcel)
+        parcels.getSingleParcel(req.params.id).then((parcel) => {
+            if (parcel != null) {
                 res.status(200).send(parcel);
-            else
-                // Status returned here should be 204 - empty content. But not working as expected.
-                // So returning 500 for now. It will be fixed later.
-                res.status(500).send("Couldn't find the Parcel");
-        }).catch(function(err) {
-            res.status(500).send(err);
+            }
+        }).catch((err) => {
+            res.status(204).send(err);
         });
     });
 
