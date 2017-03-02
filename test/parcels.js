@@ -6,18 +6,22 @@ var sinon = require('sinon');
 var parcelsDAO = require('../dao/parcelsDAO');
 var Promise = require('bluebird');
 var getSingleParcel;
+var deleteParcel;
+var getAllParcels;
 
 describe('Test Couriers Controller', () => {
     before(() => {
         server.startServer(9090);
         getSingleParcel = sinon.stub(parcelsDAO, 'getSingleParcel');
+        deleteParcel = sinon.stub(parcelsDAO, 'deleteParcel');
+        getAllParcels = sinon.stub(parcelsDAO, 'getAllParcels');
     });
 
     after(() => {
         server.stopServer();
     });
 
-    describe('Calling /', () => {
+    describe('Calling GET /', () => {
         it('should return 200 status code', (done) => {
             request('http://localhost:9090', (error, response, body) => {
                 expect(response.statusCode).to.equal(200);
@@ -26,8 +30,8 @@ describe('Test Couriers Controller', () => {
         })
     });
 
-    describe('Calling /parcesls/1', () => {
-        it('should get dummy data for 1', (done) => {
+    describe('Calling GET /parcesls/1', () => {
+        it('should get dummy data for 1, status : 200', (done) => {
             getSingleParcel.withArgs('1').returns(new Promise((resolve, reject) => {
                 resolve({parcel_id: '1'});
             }));
@@ -41,8 +45,8 @@ describe('Test Couriers Controller', () => {
         });
     });
 
-    describe('Calling /parcesls/empty', () => {
-        it('should get 204 for \'empty\' parcel id', (done) => {
+    describe('Calling GET /parcesls/empty', () => {
+        it('should get 204 for \'empty\' parcel id, status : 204', (done) => {
             getSingleParcel.withArgs('empty').returns(new Promise((resolve, reject) => {
                 resolve(null);
             }));
@@ -53,4 +57,60 @@ describe('Test Couriers Controller', () => {
             });
         });
     });
+
+    describe('Calling GET /parcesls/all/ids', () => {
+        it('should get 2 dummy records [{parcel_id: 1}, {parcel_id: 2}], status : 200', (done) => {
+            getAllParcels.withArgs().returns(new Promise((resolve, reject) => {
+                resolve([{parcel_id: '1'}, {parcel_id: '2'}]);
+            }));
+
+            request('http://localhost:9090/parcels/all/ids',  (error, response, body) => {
+                body = JSON.parse(body);
+                expect(body[0].parcel_id).to.equal('1');
+                expect(body[1].parcel_id).to.equal('2');
+                expect(response.statusCode).to.equal(200);
+                done();
+            });
+        });
+
+        it('should get no records, status : 204', (done) => {
+            getAllParcels.withArgs().returns(new Promise((resolve, reject) => {
+                resolve(null);
+            }));
+
+            request('http://localhost:9090/parcels/all/ids',  (error, response, body) => {
+                expect(response.statusCode).to.equal(204);
+                done();
+            });
+        });
+    });
+
+    describe('Calling DELETE /parcesls/1', () => {
+        it('should delete dummy data for 1 and return \'Deleted Successfully\', status : 200', (done) => {
+            deleteParcel.withArgs('1').returns(new Promise((resolve, reject) => {
+                resolve({parcel_id: '1'});
+            }));
+
+            request.delete('http://localhost:9090/parcels/1',  (error, response, body) => {
+                expect(body).to.equal('Deleted Successfully');
+                expect(response.statusCode).to.equal(200);
+                done();
+            });
+        });
+    });
+
+    describe('Calling DELETE /parcesls/2', () => {
+        it('should not find parcel 2 and should return \'Couldn\'t find the parcel\', status : 400', (done) => {
+            deleteParcel.withArgs('2').returns(new Promise((resolve, reject) => {
+                resolve(null);
+            }));
+
+            request.delete('http://localhost:9090/parcels/2',  (error, response, body) => {
+                expect(body).to.equal('Couldn\'t find the parcel');
+                expect(response.statusCode).to.equal(400);
+                done();
+            });
+        });
+    });
+
 });
