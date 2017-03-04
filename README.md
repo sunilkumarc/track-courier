@@ -5,4 +5,4 @@ Track Courier
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)]()
 
 A web application to track couriers in real time.
-Application URL -   https://track-courier-zzuaghmpmp.now.sh
+Application URL -   https://track-courier-pbdjxvrvaa.now.sh/
