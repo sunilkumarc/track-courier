@@ -168,6 +168,7 @@
             <input type="password" name="password" /><span class="password" style="color: red"/>
             <br/>
 
+            <div class="unauthorized" style="color: red"/>
             <button type="submit" class="btn btn-primary">Login</button>
             <a href="" class="btn btn-primary">Back</a>
         </form>
@@ -248,6 +249,9 @@
             if (pass === "") {
                 $('.password').html('Password cannot be empty');
             }
+            return false;
+        } else if (pass === "") {
+            $('.password').html('Password cannot be empty');
             return false;
         }
         return true;
@@ -340,7 +344,7 @@
                         },
 
                         error: function(err) {
-                            console.log(err);
+                            $('.unauthorized').html('Invalid Credentials');
                         }
                     });
                 }
@@ -587,6 +591,7 @@
 
         router.on('route:home', function() {
             homePageView.render();
+            courierDetailsView.$el.html('');
         });
 
         router.on('route:login', function() {
@@ -598,6 +603,7 @@
         });
 
         router.on('route:courier-details', function(id) {
+            homePageView.$el.html('');
             courierDetailsView.render(id);
         });
 
@@ -606,13 +612,6 @@
         });
 
         Backbone.history.start();
-        // Backbone.history.start({ pushState: true });
-        //
-        // $(document).on("click", "a", function(e) {
-        //     e.preventDefault();
-        //     var href = $(e.currentTarget).attr('href');
-        //     router.navigate(href, true);
-        // });
     </script>
 </body>
 </html>
