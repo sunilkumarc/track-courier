@@ -1,38 +1,5 @@
-var bcrypt = require('bcryptjs');
-var models = require('../models');
 var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
-
-passport.use(new LocalStrategy({passReqToCallback : true}, function(req, username, password, done) {
-        models.Accounts.findOne({ where: { username: username}}).then(function(user) {
-            if (!user) {
-                console.log('Unkown User');
-                return done(null, false, {message: 'Unknown User'});
-            }
-
-            bcrypt.compare(password, user.password, function(err, isMatch) {
-                if (err) throw err;
-                if (isMatch) {
-                    req.session.username = req.body.username;
-                    return done(null, user);
-                } else {
-                    return done(null, false, {message: 'Invalid Password'});
-                }
-            });
-        }).catch(function(err) {
-            return done(null, false);
-        });
-}));
-
-passport.serializeUser(function (user, done) {
-    done(null, user.username)
-});
-
-passport.deserializeUser(function (username, done) {
-    models.Accounts.findOne({ where: { username: username}}).then(function(user) {
-        done(null, user);
-    });
-});
+var accounts = require('../dao/accountsDAO');
 
 module.exports.set = function(app) {
     app.get('/accounts/isloggedin', function(req, res) {
@@ -52,23 +19,12 @@ module.exports.set = function(app) {
     });
 
     app.post('/accounts/register', function(req, res) {
-        var body = req.body;
-        var salt = bcrypt.genSaltSync(10);
-        var hash = bcrypt.hashSync(body.password, salt);
-
-        console.log(body);
-        models.Accounts.create({
-            username: body.username,
-            name: body.name,
-            email_id: body.email_id,
-            password: hash
-        }).then(function(account) {
-            console.log('promise.then');
-            req.session.username = body.username;
-            res.status(201).send(account);
-        }).catch(function(err) {
-            console.log("promise.catch");
-            res.status(500).send("Something went wrong. Couldn't save the data.");
+        accounts.registerUser(req.body).then((account) => {
+            if (account != null) {
+                res.status(200).send(account);
+            }
+        }).catch((err) => {
+            res.status(500).send(err);
         });
     });
 }

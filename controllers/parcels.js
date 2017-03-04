@@ -1,4 +1,3 @@
-// var db_connection = require('../models/database.js');
 var random = require('../utilities/random_num_generator.js');
 var models = require('../models');
 var parcels = require('../dao/parcelsDAO');
