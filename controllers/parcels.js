@@ -51,7 +51,7 @@ module.exports.set = function(app) {
     app.post("/parcels", function(req, res) {
         parcels.insertParcel(req.body).then((parcel) => {
             if (parcel != null) {
-                res.status(200).send(msg);
+                res.status(200).send(parcel);
             }
         }).catch((err) => {
             res.status(400).send(err);

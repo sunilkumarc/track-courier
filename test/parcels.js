@@ -15,6 +15,8 @@ describe('Test Couriers Controller', () => {
         getSingleParcel = sinon.stub(parcelsDAO, 'getSingleParcel');
         deleteParcel = sinon.stub(parcelsDAO, 'deleteParcel');
         getAllParcels = sinon.stub(parcelsDAO, 'getAllParcels');
+        updateParcel = sinon.stub(parcelsDAO, 'updateParcel');
+        insertParcel = sinon.stub(parcelsDAO, 'insertParcel');
     });
 
     after(() => {
@@ -113,4 +115,51 @@ describe('Test Couriers Controller', () => {
         });
     });
 
+    describe('Calling PUT /parcesls/1', () => {
+        it('should dummy update parcel with id 1, status : 200', (done) => {
+            updateParcel.withArgs({}, '1').returns(new Promise((resolve, reject) => {
+                resolve('Updated Successfully');
+            }));
+
+            request.put('http://localhost:9090/parcels/1',  (error, response, body) => {
+                expect(response.statusCode).to.equal(200);
+                expect(body).to.equal('Updated Successfully');
+                done();
+            });
+        });
+    });
+
+    describe('Calling PUT /parcesls/empty', () => {
+        it('should result in bad request, status : 400', (done) => {
+            updateParcel.withArgs({}, 'empty').returns(new Promise((resolve, reject) => {
+                reject('Parcel not present');
+            }));
+
+            request.put('http://localhost:9090/parcels/empty',  (error, response, body) => {
+                expect(response.statusCode).to.equal(400);
+                expect(body).to.equal('Parcel not present');
+                done();
+            });
+        });
+    });
+
+    describe('Calling POST /parcels', () => {
+        it('should imitate data insert, status : 200', (done) => {
+            insertParcel.withArgs({parcel_id: '1'}).returns(new Promise((resolve, reject) => {
+                resolve({parcel_id: '1'});
+            }));
+
+            var options = {
+                            uri: 'http://localhost:9090/parcels',
+                            method: 'POST',
+                            json: { parcel_id: '1' }
+                        };
+
+            request(options,  (error, response, body) => {
+                expect(response.statusCode).to.equal(200);
+                expect(body.parcel_id).to.equal('1');
+                done();
+            });
+        });
+    });
 });
