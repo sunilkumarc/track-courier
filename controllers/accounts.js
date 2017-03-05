@@ -19,7 +19,7 @@ module.exports.set = function(app) {
     });
 
     app.post('/accounts/register', function(req, res) {
-        accounts.registerUser(req.body).then((account) => {
+        accounts.registerUser(req).then((account) => {
             if (account != null) {
                 res.status(200).send(account);
             }

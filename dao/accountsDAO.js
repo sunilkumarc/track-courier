@@ -34,8 +34,9 @@ passport.deserializeUser(function (username, done) {
     });
 });
 
-registerUser = function(body) {
+registerUser = function(req) {
     return new Promise((resolve, reject) => {
+        var body = req.body;
         var salt = bcrypt.genSaltSync(10);
         var hash = bcrypt.hashSync(body.password, salt);
 

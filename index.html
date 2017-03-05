@@ -64,8 +64,8 @@
 
         <h3>Track Your Courier</h3>
         <form class="track-courier-form">
-            <label>Courier Id</label>
-            <input type="text" name="courier" class='courier-id'/>
+            <label>Courier ID</label>
+            <input type="text" name="courier" class='courier-id'/> <span class="parcel_not_exits" style="color:red" />
             <br/>
             <button type="submit" class="btn btn-primary">Track</button>
         </form>
@@ -134,7 +134,7 @@
     <script type="text/template" id="update-courier">
         <form class="update-courier-form">
             <label>Courier</label>
-            <select name="parcel_id">
+            <select name="parcel_id" id="parcel_id_selected">
                 <% _.each(courierIds, function(courier) { %>
                     <option value="<%= courier.parcel_id%>"><%= courier.parcel_id%></option>
                 <% }); %>
@@ -145,6 +145,7 @@
             <input type="text" name="new_location" id="find-places" placeholder="Search Location"/><span class="new-location" style="color: red"/>
             <br/>
             <button type="submit" class="btn btn-primary">Update Courier</button>
+            <button class="btn btn-primary delete-courier">Delete Courier</button>
             <a class="btn btn-primary back">Back</a>
         </form>
     </script>
@@ -152,7 +153,8 @@
     <script type="text/template" id="dashboard-page">
         <h2>Welcome to your dashboard </h2>
         <button class="btn btn-primary add-courier">Add Courier</button>
-        <button class="btn btn-primary update-courier">Update Courier</button>
+        <button class="btn btn-primary update-courier">Update/Delete Courier</button>
+        <br/><br>
         <button class="btn btn-primary logout">Logout</button>
         <a href="/" class="btn btn-primary back">Back</a>
     </script>
@@ -177,7 +179,25 @@
     <!-- Signup Page -->
     <script type="text/template" id="signup-page">
         <h3>Signup Page</h3>
-        <a href="" class="btn btn-primary">Back</a>
+        <form class="signup-form">
+            <label>Username</label>
+            <input type="text" name="username" /><span class="signup-username" style="color: red"/>
+
+            <label>Name</label>
+            <input type="text" name="name" /><span class="signup-name" style="color: red"/>
+
+            <label>Email ID</label>
+            <input type="text" name="email_id" /><span class="signup-email" style="color: red"/>
+
+            <label>Password</label>
+            <input type="password" name="password" /><span class="signup-password" style="color: red"/>
+
+            <label>Confirm Password</label>
+            <input type="password" name="confirm_password" /><span class="signup-confirm" style="color: red"/>
+            <br/>
+          <button type="submit" class="btn btn-primary">Sign Up</button>
+          <a class="btn btn-primary back">Back</a>
+          </form>
     </script>
 
     <!-- Courier Details -->
@@ -257,6 +277,40 @@
         return true;
     }
 
+    function validateNewUser(user) {
+        var username = user.username.trim();
+        var pass = user.password.trim();
+        var confirm = user.confirm_password.trim();
+        var name = user.name.trim();
+        var email_id = user.email_id.trim();
+        $('.signup-username').html("");
+        $('.signup-password').html("");
+        $('.signup-name').html("");
+        $('.signup-email').html("");
+        $('.signup-confirm').html("");
+
+        if (username === "") {
+            $('.signup-username').html('Username cannot be empty');
+            return false;
+        } else if (name === "") {
+            $('.signup-name').html('Name cannot be empty');
+            return false;
+        } else if (email_id === "") {
+            $('.signup-email').html('Email cannot be empty');
+            return false;
+        } else if (pass === "") {
+            $('.signup-password').html('Password cannot be empty');
+            return false;
+        } else if (confirm === "") {
+            $('.signup-confirm').html('Password cannot be empty');
+            return false;
+        } else if (pass != confirm) {
+            $('.signup-confirm').html('Passwords not matching');
+            return false;
+        }
+        return true;
+    }
+
     function validateCourier(courier) {
         var fromPerson = courier.from_person_name.trim();
         var toPerson = courier.to_person_name.trim();
@@ -292,6 +346,7 @@
     <script>
         $.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
             options.url = 'https://track-courier-xjhrndlony.now.sh' + options.url;
+            // options.url = 'http://localhost:8000' + options.url;
         });
         function htmlEncode(value){
           return $('<div/>').text(value).html();
@@ -361,6 +416,33 @@
         var SignupView = Backbone.View.extend({
             el: '.home-page',
 
+            events: {
+                'submit .signup-form': 'signup'
+            },
+
+            signup: function(ev) {
+                ev.preventDefault();
+                var that = this;
+                var userDetails = $(ev.currentTarget).serializeObject();
+                if(validateNewUser(userDetails)) {
+                    var user = new User();
+                    user.urlRoot += 'register';
+                    delete userDetails.confirm_password;
+                    user.save(userDetails, {
+                        success: function(userDetails) {
+                            window.localStorage.setItem('userDetails', userDetails);
+                            that.$el.html('');
+                            router.navigate('/#dashboard', true);
+                        },
+
+                        error: function(err) {
+                            // $('.unauthorized').html('Invalid Credentials');
+                            console.log(err);
+                        }
+                    });
+                }
+            },
+
             render: function() {
                 var template = _.template($('#signup-page').html());
                 this.$el.html(template);
@@ -392,9 +474,14 @@
                 var courier = new Courier({id: courierId});
                 courier.fetch({
                     success: function(parcel) {
-                        var template = _.template($('#courier-details').html(), {parcel: parcel});
-                        that.$el.html(template);
-                        that.loadMap(parcel.get('current_location_lat'), parcel.get('current_location_long'));
+                        if (parcel.get('parcel_id') != undefined) {
+                            var template = _.template($('#courier-details').html(), {parcel: parcel});
+                            that.$el.html(template);
+                            that.loadMap(parcel.get('current_location_lat'), parcel.get('current_location_long'));
+                        } else {
+                            router.navigate('/', true);
+                            $('.parcel_not_exits').html('Courier doesn\'t exits');
+                        }
                     },
 
                     error: function(err, response) {
@@ -416,9 +503,29 @@
                 'click .logout': 'logout',
                 'click .add-courier': 'loadAddCourierView',
                 'click .update-courier': 'loadUpdateCourierView',
+                'click .delete-courier': 'deleteCourier',
                 'click .back': 'back',
                 'submit .add-courier-form': 'addCourier',
                 'submit .update-courier-form': 'updateCourier'
+            },
+
+            deleteCourier: function(ev) {
+                ev.preventDefault();
+                var courierId = $('#parcel_id_selected').val();
+                if (courierId != null && courierId != "") {
+                    var courier = new Courier();
+                    courier.id = courierId;
+                    courier.destroy({
+                        success: (response) => {
+                            alert('Deleted successfully!');
+                            router.navigate('/#dashboard', true);
+                        },
+
+                        error: (msg) => {
+                            console.log(msg);
+                        }
+                    });
+                }
             },
 
             updateCourier: function(ev) {
@@ -565,8 +672,12 @@
             track: function(ev) {
                 ev.preventDefault();
                 var courierId = $(ev.currentTarget).serializeObject().courier;
-                this.$el.html('');
-                router.navigate('/courier-details/' + courierId, true);
+                if (courierId != null && courierId != "") {
+                    this.$el.html('');
+                    router.navigate('/courier-details/' + courierId, true);
+                } else {
+                    $('.parcel_not_exits').html('Courier ID cannot be empty');
+                }
             },
 
             render: function() {
