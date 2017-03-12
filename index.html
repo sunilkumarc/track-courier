@@ -4,6 +4,10 @@
     <meta charset="utf-8">
     <title>Track Courier</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.1.1/css/bootstrap.min.css">
+    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>-->
     <style>
     /*.add-courier-table th, .add-courier-table td {
         border-top: none;
@@ -16,8 +20,6 @@
 <body>
     <!-- Container where the different pages will be loaded -->
     <div class="container">
-        <h1>Track Courier</h1>
-        <hr/>
         <div class="home-page"></div>
         <div class="courier-details"></div>
         <div class="dashboard"></div>
@@ -53,6 +55,8 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBahcCcZwj05QXi1AGOO1FlxRnfD05kaKU&libraries=places"></script>
     <!-- Home Page -->
     <script type="text/template" id="home-page">
+        <h1>Track Courier</h1>
+        <hr/>
         <% if (window.localStorage.getItem('userDetails') == null) { %>
             <a href="#login" class="btn btn-primary">Login</a>
             <a href="#signup" class="btn btn-primary">Signup</a>
@@ -60,20 +64,21 @@
             <a href="#dashboard" class="btn btn-primary">Manage Couriers</a>
             <button class="btn btn-primary logout">Logout</button>
         <% } %>
-        <br>
+        <br/><br/>
 
-        <h3>Track Your Courier</h3>
+        <h4>Track Your Courier</h4>
         <form class="track-courier-form">
-            <label>Courier ID</label>
+            <label>Courier ID</label><br/>
             <input type="text" name="courier" class='courier-id'/> <span class="parcel_not_exits" style="color:red" />
-            <br/>
+            <br/><br/>
             <button type="submit" class="btn btn-primary">Track</button>
         </form>
     </script>
 
     <script type="text/template" id="add-courier">
+        <h1>Add Courier</h1>
+        <hr/>
         <form class="add-courier-form">
-            <h3>Add Courier</h3>
             <table class="table table-bordered">
               <tbody>
                   <tr>
@@ -132,6 +137,8 @@
     </script>
 
     <script type="text/template" id="update-courier">
+        <h1>Update Courier</h1>
+        <hr/>
         <form class="update-courier-form">
             <label>Courier</label>
             <select name="parcel_id" id="parcel_id_selected">
@@ -152,10 +159,51 @@
 
     <script type="text/template" id="dashboard-page">
         <h2>Welcome to your dashboard </h2>
+        <hr/>
         <button class="btn btn-primary add-courier">Add Courier</button>
         <button class="btn btn-primary update-courier">Update/Delete Courier</button>
-        <br/><br>
         <button class="btn btn-primary logout">Logout</button>
+        <br/><br>
+
+        <h3>Couriers</h3>
+        <!--<table class="table">-->
+        <table class="table table-bordered">
+            <thead class="thead-inverse">
+                <tr>
+                    <th>Parcel ID</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Color</th>
+                    <th>Weight</th>
+                    <th>Service Price</th>
+                    <th>Dispatched On</th>
+                    <th>Expected Delivery</th>
+                    <th>Sender Address</th>
+                    <th>Receiver Address</th>
+                    <th>Sender Phone No</th>
+                    <th>Receiver Phone No</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% _.each(couriers, function(courier) { %>
+                    <tr>     
+                        <td><%= courier.parcel_id%></td>
+                        <td><%= courier.from_person_name%></td>
+                        <td><%= courier.to_person_name%></td>
+                        <td><%= courier.color%></td>
+                        <td><%= courier.weight%></td>
+                        <td><%= courier.service_price%></td>
+                        <td><%= courier.dispatched_on%></td>
+                        <td><%= courier.expected_delivery%></td>
+                        <td><%= courier.sender_address%></td>
+                        <td><%= courier.receiver_address%></td>
+                        <td><%= courier.sender_phone_no%></td>
+                        <td><%= courier.receiver_phone_no%></td>
+                    </tr>
+                <% }); %>
+            </thbody>
+
+        </table>
         <a href="/" class="btn btn-primary back">Back</a>
     </script>
 
@@ -345,8 +393,8 @@
 
     <script>
         $.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
-            options.url = 'https://track-courier-wvwxuxwqiw.now.sh' + options.url;
-            // options.url = 'http://localhost:8000' + options.url;
+            // options.url = 'https://track-courier-wvwxuxwqiw.now.sh' + options.url;
+            options.url = 'http://localhost:8000' + options.url;
         });
         function htmlEncode(value){
           return $('<div/>').text(value).html();
@@ -579,7 +627,7 @@
 
             back: function(ev) {
                 var template = _.template($('#dashboard-page').html());
-                this.$el.html(template);
+                this.render();
             },
 
             loadAddCourierView: function(ev) {
@@ -631,9 +679,21 @@
                 if(window.localStorage.getItem('userDetails') == null)
                     router.navigate('/#login', true);
                 else {
+                    var that = this;
                     $('.home-page').html('');
-                    var template = _.template($('#dashboard-page').html());
-                    this.$el.html(template);
+                    var courier = new Courier();
+                    courier.urlRoot += "all/ids";
+                    courier.fetch({
+                        success: function(couriers) {
+                            console.log(couriers.attributes);
+                            var template = _.template($('#dashboard-page').html(), {couriers:couriers.attributes});
+                            that.$el.html(template);
+                        },
+
+                        error: function(err, response) {
+                            console.log('Error in retrieving ids');
+                        }
+                    });
                 }
             }
         });

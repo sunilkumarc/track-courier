@@ -16,7 +16,7 @@ getSingleParcel = function(parcel_id) {
 
 getAllParcels = function() {
     return new Promise((resolve, reject) => {
-        models.Parcels.findAll({attributes: ['parcel_id']}).then(function(parcels) {
+        models.Parcels.findAll().then(function(parcels) {
             if (parcels) {
                 resolve(parcels);
             } else {
