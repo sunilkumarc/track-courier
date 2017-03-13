@@ -18,6 +18,9 @@ module.exports = function(sequelize, DataTypes) {
         weight: {
             type: DataTypes.FLOAT
         },
+        status: {
+            type: DataTypes.STRING
+        },
         service_price: {
             type: DataTypes.FLOAT
         },

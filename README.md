@@ -8,4 +8,10 @@ A web application to track couriers in real time.
 
 Application URL -  https://track-courier-frhctwnvgr.now.sh
 
+To play around with the app, use the below details:
+
+* Username : sunilkumarc
+* Password : s
+* Courier Id : 4GQma0AWKs
+
 [![Track Courier](https://img.youtube.com/vi/mG09xGNsL9k/0.jpg)](https://www.youtube.com/watch?v=mG09xGNsL9k)

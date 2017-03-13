@@ -36,6 +36,7 @@ updateParcel = function(body, parcel_id) {
                     expected_delivery: body.expected_delivery,
                     current_location_lat : body.new_location_lat,
                     current_location_long : body.new_location_long,
+                    status : body.status
                 });
                 resolve("Updated Successfully");
             } else {
@@ -67,6 +68,7 @@ insertParcel = function(body) {
             to_person_name : body.to_person_name,
             color : body.color,
             weight : body.weight,
+            status : body.status,
             service_price : body.service_price,
             dispatched_on : body.dispatched_on,
             expected_delivery : body.expected_delivery,
@@ -75,8 +77,7 @@ insertParcel = function(body) {
             sender_phone_no : body.sender_phone_no,
             receiver_phone_no : body.receiver_phone_no,
             current_location_lat : body.current_location_lat,
-            current_location_long : body.current_location_long,
-            status : "dispatched"
+            current_location_long : body.current_location_long
         }).then(function(parcel) {
             resolve(parcel);
         }).catch(function(err) {

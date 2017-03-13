@@ -148,6 +148,11 @@
             </select>
             <label>Expected Delivery</label>
             <input type="date" name="expected_delivery"/><span class="new-expected-delivery" style="color: red"/>
+            <label>Status</label>
+            <select name="status" id="parcel_status">
+                <option value="Delivered">Delivered</option>
+                <option value="Not Delivered">Not Delivered</option>
+            </select>
             <label>New Location</label>
             <input type="text" name="new_location" id="find-places" placeholder="Search Location"/><span class="new-location" style="color: red"/>
             <br/>
@@ -171,34 +176,18 @@
             <thead class="thead-inverse">
                 <tr>
                     <th>Parcel ID</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Color</th>
-                    <th>Weight</th>
-                    <th>Service Price</th>
                     <th>Dispatched On</th>
                     <th>Expected Delivery</th>
-                    <th>Sender Address</th>
-                    <th>Receiver Address</th>
-                    <th>Sender Phone No</th>
-                    <th>Receiver Phone No</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 <% _.each(couriers, function(courier) { %>
-                    <tr>     
+                    <tr onclick="document.location = '#/courier-details/' + '<%= courier.parcel_id %>'" style="cursor: pointer">
                         <td><%= courier.parcel_id%></td>
-                        <td><%= courier.from_person_name%></td>
-                        <td><%= courier.to_person_name%></td>
-                        <td><%= courier.color%></td>
-                        <td><%= courier.weight%></td>
-                        <td><%= courier.service_price%></td>
                         <td><%= courier.dispatched_on%></td>
                         <td><%= courier.expected_delivery%></td>
-                        <td><%= courier.sender_address%></td>
-                        <td><%= courier.receiver_address%></td>
-                        <td><%= courier.sender_phone_no%></td>
-                        <td><%= courier.receiver_phone_no%></td>
+                        <td><%= courier.status%></td>
                     </tr>
                 <% }); %>
             </thbody>
@@ -266,6 +255,10 @@
                   <td><%= htmlEncode(parcel.get('to_person_name')) %></td>
               </tr>
               <tr>
+                  <th>Status</th>
+                  <td><%= htmlEncode(parcel.get('status')) %></td>
+              </tr>
+              <tr>
                   <th>Color</th>
                   <td><%= htmlEncode(parcel.get('color')) %></td>
               </tr>
@@ -301,8 +294,8 @@
         </table>
         <h5>Currency Location</h5>
         <div class="map" style="width:80%;height:300px"></div><br/>
-        <a href="" class="btn btn-primary">Back</a>
-    </script>
+        <a onclick="history.go(-1)" class="btn btn-primary">Back</a>
+    </script>   
 
     <script>
     function validateUser(user) {
@@ -584,6 +577,7 @@
                     // courier.urlRoot += courierDetails.parcel_id;
                     courierDetails.new_location_lat = courierLattitude;
                     courierDetails.new_location_long = courierLongitude;
+                    courierDetails.status = $('#parcel_status :selected').text();
                     delete courierDetails.new_location;
                     courier.idAttribute = "parcel_id";
 
@@ -612,6 +606,7 @@
                     courierDetails.parcel_id = generateCourierId(10);
                     courierDetails.weight = parseFloat(courierDetails.weight);
                     delete courierDetails.current_location;
+                    courierDetails.status = "Not Delivered";
                     courier.save(courierDetails, {
                         success: function(courierDetails) {
                             alert('Added courier successfully!');
@@ -762,6 +757,7 @@
 
         router.on('route:home', function() {
             homePageView.render();
+            dashboardView.$el.html('');
             courierDetailsView.$el.html('');
         });
 
@@ -774,11 +770,13 @@
         });
 
         router.on('route:courier-details', function(id) {
+            dashboardView.$el.html('');
             homePageView.$el.html('');
             courierDetailsView.render(id);
         });
 
         router.on('route:dashboard', function() {
+            courierDetailsView.$el.html('');
             dashboardView.render();
         });
 
