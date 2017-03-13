@@ -6,7 +6,7 @@ Track Courier
 
 A web application to track couriers in real time.
 
-Application URL -  https://track-courier-frhctwnvgr.now.sh
+Application URL -  https://track-courier-svycbovcii.now.sh
 
 To play around with the app, use the below details:
 
